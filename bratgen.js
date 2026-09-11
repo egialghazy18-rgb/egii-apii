@@ -50,7 +50,7 @@ async function getEmojiImage(emoji) {
   const variants = [
     base,
     base.replace(/-fe0f/gi, ''),
-    `${base.replace(/-fe0f/gi, '')}-fe0f`,
+    base.replace(/-fe0f/gi, '') + '-fe0f',
     base.toUpperCase(),
     base.replace(/-fe0f/gi, '').toUpperCase(),
     base.replace(/-fe0f/gi, '').toUpperCase() + '-FE0F'
@@ -104,7 +104,7 @@ async function drawTextWithEmojis(ctx, text, x, y, fontSize) {
 }
 
 function wrapText(ctx, text, maxWidth, fontSize) {
-  ctx.font = `${fontSize}px Impact`
+  ctx.font = fontSize + 'px Impact'
   const words = text.split(' ')
   const lines = []
   let cur = ''
@@ -145,7 +145,7 @@ function easeOutBack(x) {
 
 function calculateWordLayout(ctx, fullText, maxWidth, maxHeight, lineGap, margin, padding, boxSize) {
   const fontSize = findBestFontSize(ctx, fullText, maxWidth, maxHeight, lineGap)
-  ctx.font = `${fontSize}px Impact`
+  ctx.font = fontSize + 'px Impact'
   const defaultSpaceWidth = ctx.measureText(' ').width
   const fullLines = wrapText(ctx, fullText, maxWidth, fontSize)
   const totalTextHeight = fullLines.length * (fontSize + lineGap) - lineGap
@@ -158,9 +158,7 @@ function calculateWordLayout(ctx, fullText, maxWidth, maxHeight, lineGap, margin
     const isLastLine = (l === fullLines.length - 1)
     const totalWordsW = lineWords.reduce((acc, w) => acc + measureTextCustom(ctx, w, fontSize), 0)
     let spaceBetween = defaultSpaceWidth
-    if (!isLastLine && lineWords.length > 1) {
-      spaceBetween = (maxWidth - totalWordsW) / (lineWords.length - 1)
-    }
+    if (!isLastLine && lineWords.length > 1) spaceBetween = (maxWidth - totalWordsW) / (lineWords.length - 1)
     let currentX = margin + padding
     for (const word of lineWords) {
       const wordW = measureTextCustom(ctx, word, fontSize)
@@ -178,22 +176,24 @@ async function renderCanvas({ wordLayouts, fontSize, wordStates, theme, blurAmou
   const boxSize = size - margin * 2
   const canvas = createCanvas(size, size)
   const ctx = canvas.getContext('2d')
-
-  ctx.fillStyle = selectedTheme.bg
-  ctx.fillRect(0, 0, size, size)
-
+  if (format !== 'gif') {
+    ctx.fillStyle = selectedTheme.bg
+    ctx.fillRect(0, 0, size, size)
+  } else {
+    ctx.clearRect(0, 0, size, size)
+    ctx.fillStyle = selectedTheme.bg
+    ctx.fillRect(margin, margin, boxSize, boxSize)
+  }
   if (!wordLayouts || wordLayouts.length === 0) return canvas
-
   ctx.save()
   ctx.beginPath()
   ctx.rect(margin, margin, boxSize, boxSize)
   ctx.clip()
   ctx.fillStyle = selectedTheme.text
-  ctx.font = `${fontSize}px Impact`
+  ctx.font = fontSize + 'px Impact'
   ctx.textAlign = 'left'
   ctx.textBaseline = 'top'
-  if (blurAmount > 0) ctx.filter = `blur(${blurAmount}px)`
-
+  if (blurAmount > 0) ctx.filter = 'blur(' + blurAmount + 'px)'
   for (let idx = 0; idx < wordLayouts.length; idx++) {
     const item = wordLayouts[idx]
     const state = wordStates[idx] || { scale: 0, alpha: 0, visible: false }
@@ -210,7 +210,6 @@ async function renderCanvas({ wordLayouts, fontSize, wordStates, theme, blurAmou
     await drawTextWithEmojis(ctx, item.text, item.x, item.y, fontSize)
     ctx.restore()
   }
-
   if (highlightProgress > 0 && highlightProgress <= 1) {
     const totalDist = boxSize * 2.8
     const curr = margin - boxSize * 1.0 + highlightProgress * totalDist
@@ -229,7 +228,6 @@ async function renderCanvas({ wordLayouts, fontSize, wordStates, theme, blurAmou
     ctx.fillStyle = grad
     ctx.fillRect(margin, margin, boxSize, boxSize)
   }
-
   ctx.restore()
   return canvas
 }
@@ -239,30 +237,22 @@ async function generateBratVideo({ text = 'brat', theme = 'white', blur = 0, for
   await ensureFont()
   await loadEmojiMap()
   if (!text.trim()) throw new Error('Teks kosong')
-
   const tmpDir = mkdtempSync(path.join(os.tmpdir(), 'brat-'))
   const FPS = 60
   const frameStepTime = 1 / FPS
   const tasks = []
-  const size = 1000
-  const margin = 70
-  const padding = 40
+  const size = 1000, margin = 70, padding = 40
   const boxSize = size - margin * 2
   const lineGap = 15
   const maxWidth = boxSize - padding * 2
   const maxHeight = boxSize - padding * 2
-
   const dummyCanvas = createCanvas(size, size)
   const dummyCtx = dummyCanvas.getContext('2d')
   const { fontSize, wordLayouts } = calculateWordLayout(dummyCtx, text, maxWidth, maxHeight, lineGap, margin, padding, boxSize)
   const totalWords = wordLayouts.length
-
   tasks.push({ wordStates: wordLayouts.map(() => ({ scale: 0, alpha: 0, visible: false })), highlightProgress: 0, duration: 0.15 })
-
-  const staggerFrames = 5
-  const bounceFramesCount = 28
+  const staggerFrames = 5, bounceFramesCount = 28
   const totalBounceFrames = (totalWords - 1) * staggerFrames + bounceFramesCount
-
   for (let f = 0; f < totalBounceFrames; f++) {
     const wordStates = wordLayouts.map((_, i) => {
       const startFrame = i * staggerFrames
@@ -271,49 +261,42 @@ async function generateBratVideo({ text = 'brat', theme = 'white', blur = 0, for
       else if (currentFrame >= bounceFramesCount) return { scale: 1.0, alpha: 1.0, visible: true }
       else {
         const prog = currentFrame / (bounceFramesCount - 1)
-        const bounceFactor = easeOutBack(prog)
-        return { scale: 0.2 + 0.8 * bounceFactor, alpha: Math.min(1.0, prog * 1.8), visible: true }
+        return { scale: 0.2 + 0.8 * easeOutBack(prog), alpha: Math.min(1.0, prog * 1.8), visible: true }
       }
     })
     tasks.push({ wordStates, highlightProgress: (f + 1) / totalBounceFrames, duration: frameStepTime })
   }
-
   const secondHighlightFrames = 38
   const allVisible = wordLayouts.map(() => ({ scale: 1.0, alpha: 1.0, visible: true }))
   for (let hf = 0; hf < secondHighlightFrames; hf++) {
     tasks.push({ wordStates: allVisible, highlightProgress: (hf + 1) / secondHighlightFrames, duration: frameStepTime })
   }
   tasks.push({ wordStates: allVisible, highlightProgress: 0, duration: holdDuration })
-
   const renderFrame = async (task, index) => {
     const canvas = await renderCanvas({ wordLayouts, fontSize, wordStates: task.wordStates, theme, blurAmount, highlightProgress: task.highlightProgress, format, margin })
     const buffer = await canvas.encode('png')
-    const framePath = path.join(tmpDir, `frame-${String(index + 1).padStart(5, '0')}.png`)
+    const framePath = path.join(tmpDir, 'frame-' + String(index + 1).padStart(5, '0') + '.png')
     writeFileSync(framePath, buffer)
     return { path: framePath, duration: task.duration }
   }
-
-  const framePaths = await Promise.all(tasks.map((task, i) => renderFrame(task, i)))
-
+  const framePaths = fastProgress
+    ? await Promise.all(tasks.map((task, i) => renderFrame(task, i)))
+    : await tasks.reduce(async (acc, task, i) => { const r = await acc; r.push(await renderFrame(task, i)); return r }, Promise.resolve([]))
   const manifestLines = []
   for (let i = 0; i < framePaths.length; i++) {
-    manifestLines.push(`file '${framePaths[i].path.replace(/'/g, "'\\''")}'`)
-    manifestLines.push(`duration ${framePaths[i].duration}`)
+    manifestLines.push("file '" + framePaths[i].path.replace(/'/g, "'\\''") + "'")
+    manifestLines.push('duration ' + framePaths[i].duration)
   }
-  manifestLines.push(`file '${framePaths[framePaths.length - 1].path.replace(/'/g, "'\\''")}'`)
-
+  manifestLines.push("file '" + framePaths[framePaths.length - 1].path.replace(/'/g, "'\\''") + "'")
   const concatPath = path.join(tmpDir, 'concat.txt')
   writeFileSync(concatPath, manifestLines.join('\n'))
-
   const ext = format === 'gif' ? 'gif' : 'mp4'
-  const outPath = path.join(os.tmpdir(), `brat-${Date.now()}.${ext}`)
-
+  const outPath = path.join(os.tmpdir(), 'brat-' + Date.now() + '.' + ext)
   if (format === 'gif') {
     await execFileAsync('ffmpeg', ['-y', '-f', 'concat', '-safe', '0', '-i', concatPath, '-vf', 'fps=60,scale=1000:1000:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=64[p];[s1][p]paletteuse=dither=bayer', '-loop', '0', outPath])
   } else {
     await execFileAsync('ffmpeg', ['-y', '-f', 'concat', '-safe', '0', '-i', concatPath, '-vf', 'fps=60,scale=1000:1000', '-c:v', 'libx264', '-preset', 'fast', '-crf', '18', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', outPath])
   }
-
   rmSync(tmpDir, { recursive: true, force: true })
   return outPath
 }
