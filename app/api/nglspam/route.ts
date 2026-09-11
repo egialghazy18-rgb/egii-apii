@@ -69,20 +69,28 @@ export async function GET(req: NextRequest) {
 
   let berhasil = 0
   let gagal = 0
-  let retry = 0
+  const maxRetry = jumlah * 3
 
-  let i = 0
-  while (berhasil < jumlah && retry < jumlah * 2) {
-    const ok = await kirimSatu(username, pesan)
-    if (ok) {
-      berhasil++
-    } else {
-      gagal++
-      retry++
-      await sleep(800 + Math.random() * 400)
+  let attempt = 0
+  while (berhasil < jumlah && attempt < maxRetry) {
+    // Kirim 2 sekaligus
+    const sisa = jumlah - berhasil
+    const batch = Math.min(2, sisa)
+    const results = await Promise.all(
+      Array.from({ length: batch }, () => kirimSatu(username, pesan))
+    )
+    
+    for (const ok of results) {
+      if (ok) berhasil++
+      else gagal++
     }
-    i++
-    if (i % 3 === 0) await sleep(400 + Math.random() * 300)
+    
+    attempt += batch
+
+    // Delay hanya kalau belum selesai
+    if (berhasil < jumlah) {
+      await sleep(300 + Math.random() * 200)
+    }
   }
 
   return NextResponse.json({
