@@ -21,7 +21,7 @@ function sleep(ms: number) {
   return new Promise(r => setTimeout(r, ms))
 }
 
-async function kirimSatu(username: string, pesan: string, i: number) {
+async function kirimSatu(username: string, pesan: string): Promise<boolean> {
   try {
     const res = await fetch('https://ngl.link/api/submit', {
       method: 'POST',
@@ -44,9 +44,13 @@ async function kirimSatu(username: string, pesan: string, i: number) {
         referrer: ''
       })
     })
-    return res.ok ? 1 : 0
+    if (res.ok) {
+      const data = await res.json()
+      return !!data.questionId
+    }
+    return false
   } catch {
-    return 0
+    return false
   }
 }
 
@@ -57,31 +61,35 @@ export async function GET(req: NextRequest) {
   const jumlah = Math.min(parseInt(searchParams.get('jumlah') || '1'), 100)
 
   if (!username || !pesan) {
-    return NextResponse.json({ status: false, message: 'Parameter username dan pesan wajib diisi' }, { status: 400 })
+    return NextResponse.json({ 
+      status: false, 
+      message: 'Parameter username dan pesan wajib diisi' 
+    }, { status: 400 })
   }
 
   let berhasil = 0
   let gagal = 0
+  let retry = 0
 
-  // Kirim per batch 3, delay 500-900ms antar batch
-  const batchSize = 3
-  for (let i = 0; i < jumlah; i += batchSize) {
-    const batch = []
-    for (let j = i; j < Math.min(i + batchSize, jumlah); j++) {
-      batch.push(kirimSatu(username, pesan, j))
+  let i = 0
+  while (berhasil < jumlah && retry < jumlah * 2) {
+    const ok = await kirimSatu(username, pesan)
+    if (ok) {
+      berhasil++
+    } else {
+      gagal++
+      retry++
+      await sleep(800 + Math.random() * 400)
     }
-    const results = await Promise.all(batch)
-    results.forEach(r => r ? berhasil++ : gagal++)
-    if (i + batchSize < jumlah) {
-      await sleep(500 + Math.random() * 400)
-    }
+    i++
+    if (i % 3 === 0) await sleep(400 + Math.random() * 300)
   }
 
   return NextResponse.json({
     status: true,
     username,
     pesan,
-    jumlah,
+    target: jumlah,
     berhasil,
     gagal,
     author: 'Egii Apii'
