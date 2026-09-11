@@ -59,7 +59,7 @@ export default function Home() {
         {/* Hero */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight mb-2">API Documentation</h1>
-          <p className="text-zinc-500 text-sm">Simple, fast, free. Base URL: <code className="text-white bg-zinc-900 px-2 py-0.5 rounded">https://egii-api.vercel.app</code></p>
+          <p className="text-zinc-500 text-sm">Simple, fast, free. Base URL: <code className="text-white bg-zinc-900 px-2 py-0.5 rounded">https://egii-apii-production-a7f7.up.railway.app</code></p>
         </div>
 
         {/* NGL Spam Card */}
