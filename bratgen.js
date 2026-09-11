@@ -8,7 +8,7 @@ const execFileAsync = promisify(execFile)
 
 const FONT_URL = 'https://cdn.jsdelivr.net/gh/Napoleon-Fibonacci/assets@main/font/impact.ttf'
 const EMOJI_JSON_URL = 'https://media.githubusercontent.com/media/Ditzzx-vibecoder/entahlah/main/emoji-apple.json'
-const FONT_PATH = path.join(__dirname, 'impact.ttf')
+const FONT_PATH = path.join(process.cwd(), "impact.ttf")
 const EMOJI_JSON_PATH = path.join(__dirname, 'emoji-apple.json')
 
 const THEMES = {
