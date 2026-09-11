@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { readFileSync, unlinkSync } from 'fs'
+
+const { generateBratVideo } = require('../../../bratgen.js')
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -7,16 +10,29 @@ export async function GET(req: NextRequest) {
   const format = searchParams.get('format') || 'mp4'
 
   try {
-    const res = await fetch(`http://localhost:5001/bratvid?text=${encodeURIComponent(text)}&theme=${theme}&format=${format}`)
-    const buffer = await res.arrayBuffer()
-    
-    return new NextResponse(buffer, {
+    const outPath = await generateBratVideo({
+      text,
+      theme,
+      blur: 0,
+      format,
+      holdDuration: 1.5,
+      fastProgress: true
+    })
+
+    const video = readFileSync(outPath)
+    unlinkSync(outPath)
+
+    return new NextResponse(video, {
       headers: {
         'Content-Type': format === 'gif' ? 'image/gif' : 'video/mp4',
         'Content-Disposition': `attachment; filename="bratvid.${format}"`
       }
     })
   } catch (err: any) {
-    return NextResponse.json({ status: false, message: err.message }, { status: 500 })
+    return NextResponse.json({ 
+      status: false, 
+      message: err.message,
+      stack: err.stack
+    }, { status: 500 })
   }
 }
