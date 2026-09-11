@@ -1,38 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFileSync, unlinkSync } from 'fs'
-
-const { generateBratVideo } = require('../../../bratgen.js')
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const text = searchParams.get('text') || 'brat'
-  const theme = searchParams.get('theme') || 'white'
-  const format = searchParams.get('format') || 'mp4'
 
   try {
-    const outPath = await generateBratVideo({
-      text,
-      theme,
-      blur: 0,
-      format,
-      holdDuration: 1.5,
-      fastProgress: true
-    })
-
+    const { generateBratVideo } = require('../../../bratgen.js')
+    const outPath = await generateBratVideo({ text, theme: 'white', blur: 0, format: 'mp4', holdDuration: 1.5, fastProgress: true })
+    
+    const { readFileSync, unlinkSync } = require('fs')
     const video = readFileSync(outPath)
     unlinkSync(outPath)
 
     return new NextResponse(video, {
       headers: {
-        'Content-Type': format === 'gif' ? 'image/gif' : 'video/mp4',
-        'Content-Disposition': `attachment; filename="bratvid.${format}"`
+        'Content-Type': 'video/mp4',
+        'Content-Disposition': 'attachment; filename="bratvid.mp4"'
       }
     })
   } catch (err: any) {
     return NextResponse.json({ 
       status: false, 
       message: err.message,
-      stack: err.stack
+      stack: err.stack,
+      code: err.code
     }, { status: 500 })
   }
 }
