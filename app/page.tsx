@@ -8,10 +8,6 @@ export default function Home() {
   const [nglResult, setNglResult] = useState<any>(null)
   const [nglLoading, setNglLoading] = useState(false)
 
-  const [bratText, setBratText] = useState('')
-  const [bratLoading, setBratLoading] = useState(false)
-  const [bratUrl, setBratUrl] = useState('')
-
   const extractUsername = (url: string) => {
     try {
       const u = new URL(url)
@@ -31,151 +27,189 @@ export default function Home() {
     setNglLoading(false)
   }
 
-  const handleBrat = async () => {
-    setBratLoading(true)
-    setBratUrl('')
-    const res = await fetch(`/api/bratvid?text=${encodeURIComponent(bratText)}`)
-    const blob = await res.blob()
-    const url = URL.createObjectURL(blob)
-    setBratUrl(url)
-    setBratLoading(false)
-  }
-
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white font-mono">
+    <main style={{
+      minHeight: '100vh',
+      background: '#e0e5ec',
+      fontFamily: 'system-ui, sans-serif',
+      padding: '24px 16px'
+    }}>
       {/* Header */}
-      <div className="border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-            <span className="text-black text-sm font-bold">E</span>
+      <div style={{
+        background: '#e0e5ec',
+        borderRadius: '20px',
+        padding: '20px 24px',
+        marginBottom: '24px',
+        boxShadow: '8px 8px 16px #b8bec7, -8px -8px 16px #ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            width: '40px', height: '40px',
+            borderRadius: '12px',
+            background: '#e0e5ec',
+            boxShadow: '4px 4px 8px #b8bec7, -4px -4px 8px #ffffff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 'bold', fontSize: '18px', color: '#555'
+          }}>E</div>
+          <div>
+            <div style={{ fontWeight: '700', fontSize: '16px', color: '#333' }}>Egii Apii</div>
+            <div style={{ fontSize: '11px', color: '#888' }}>by SugengTeam</div>
           </div>
-          <span className="text-lg font-semibold tracking-tight">Egii Apii</span>
-          <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full">v1.0.0</span>
         </div>
-        <span className="text-xs text-zinc-600">by SugengTeam</span>
+        <div style={{
+          background: '#e0e5ec',
+          borderRadius: '20px',
+          padding: '4px 12px',
+          boxShadow: 'inset 3px 3px 6px #b8bec7, inset -3px -3px 6px #ffffff',
+          fontSize: '11px', color: '#888'
+        }}>v1.0.0</div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-10 space-y-6">
-        {/* Hero */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">API Documentation</h1>
-          <p className="text-zinc-500 text-sm">Simple, fast, free. Base URL: <code className="text-white bg-zinc-900 px-2 py-0.5 rounded">https://egii-apii-production-a7f7.up.railway.app</code></p>
-        </div>
-
-        {/* NGL Spam Card */}
-        <div className="border border-zinc-800 rounded-xl overflow-hidden">
-          <div className="bg-zinc-900 px-5 py-4 flex items-center gap-3">
-            <span className="text-xs font-bold bg-emerald-500 text-black px-2 py-0.5 rounded">GET</span>
-            <code className="text-sm">/api/nglspam</code>
-            <span className="text-xs text-zinc-500 ml-auto">NGL Spam</span>
-          </div>
-          <div className="px-5 py-4 border-t border-zinc-800">
-            <p className="text-xs text-zinc-500 mb-4">Kirim pesan anonim ke NGL link target</p>
-            <div className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-xs text-zinc-400 mb-5">
-              <span className="text-zinc-600">GET </span>/api/nglspam?username=egiuu&pesan=hai&jumlah=5
-            </div>
-
-            {/* Try It */}
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-zinc-500 uppercase tracking-wider block mb-1">NGL Link</label>
-                <input
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-zinc-600 transition"
-                  placeholder="https://ngl.link/egiuu1"
-                  value={nglUrl}
-                  onChange={e => setNglUrl(e.target.value)}
-                />
-                {nglUrl && (
-                  <p className="text-xs text-zinc-600 mt-1">Username: <span className="text-emerald-400">{extractUsername(nglUrl)}</span></p>
-                )}
-              </div>
-              <div>
-                <label className="text-xs text-zinc-500 uppercase tracking-wider block mb-1">Pesan</label>
-                <input
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-zinc-600 transition"
-                  placeholder="hai 👋"
-                  value={pesan}
-                  onChange={e => setPesan(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-zinc-500 uppercase tracking-wider block mb-1">Jumlah (max 100)</label>
-                <input
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-zinc-600 transition"
-                  placeholder="5"
-                  type="number"
-                  value={jumlah}
-                  onChange={e => setJumlah(e.target.value)}
-                />
-              </div>
-              <button
-                onClick={handleNgl}
-                disabled={nglLoading || !nglUrl || !pesan}
-                className="w-full bg-white text-black font-semibold text-sm py-2.5 rounded-lg hover:bg-zinc-200 transition disabled:opacity-30"
-              >
-                {nglLoading ? 'Sending...' : 'Send Request'}
-              </button>
-              {nglResult && (
-                <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4">
-                  <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">Response</p>
-                  <pre className="text-xs text-emerald-400 overflow-auto">{JSON.stringify(nglResult, null, 2)}</pre>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Brat Video Card */}
-        <div className="border border-zinc-800 rounded-xl overflow-hidden">
-          <div className="bg-zinc-900 px-5 py-4 flex items-center gap-3">
-            <span className="text-xs font-bold bg-blue-500 text-black px-2 py-0.5 rounded">GET</span>
-            <code className="text-sm">/api/bratvid</code>
-            <span className="text-xs text-zinc-500 ml-auto">Brat Video</span>
-          </div>
-          <div className="px-5 py-4 border-t border-zinc-800">
-            <p className="text-xs text-zinc-500 mb-4">Generate brat style video dengan animasi + efek cahaya. Support emoji iPhone 🍎</p>
-            <div className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-xs text-zinc-400 mb-5">
-              <span className="text-zinc-600">GET </span>/api/bratvid?text=ahoy 😹
-            </div>
-
-            {/* Try It */}
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-zinc-500 uppercase tracking-wider block mb-1">Text + Emoji</label>
-                <input
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-zinc-600 transition"
-                  placeholder="ahoy 😹🍎"
-                  value={bratText}
-                  onChange={e => setBratText(e.target.value)}
-                />
-                <p className="text-xs text-zinc-600 mt-1">Tip: emoji iPhone otomatis dirender 🍎😹🔥</p>
-              </div>
-              <button
-                onClick={handleBrat}
-                disabled={bratLoading || !bratText}
-                className="w-full bg-blue-500 text-white font-semibold text-sm py-2.5 rounded-lg hover:bg-blue-600 transition disabled:opacity-30"
-              >
-                {bratLoading ? 'Generating...' : 'Generate Brat Video'}
-              </button>
-              {bratUrl && (
-                <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-3">
-                  <p className="text-xs text-zinc-500 uppercase tracking-wider">Preview</p>
-                  <video src={bratUrl} controls autoPlay loop className="w-full rounded-lg" />
-                  <a
-                    href={bratUrl}
-                    download="bratvid.mp4"
-                    className="block w-full text-center bg-zinc-800 text-white text-sm py-2 rounded-lg hover:bg-zinc-700 transition"
-                  >
-                    Download MP4
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <p className="text-center text-xs text-zinc-700 pt-4">Egii Apii — Made by SugengTeam</p>
+      {/* Hero */}
+      <div style={{ marginBottom: '24px', paddingLeft: '4px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#333', margin: '0 0 6px' }}>API Documentation</h1>
+        <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>
+          Base URL: <code style={{
+            background: '#e0e5ec',
+            boxShadow: 'inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff',
+            padding: '2px 8px', borderRadius: '6px', fontSize: '12px', color: '#555'
+          }}>egii-apii-production-a7f7.up.railway.app</code>
+        </p>
       </div>
+
+      {/* NGL Spam Card */}
+      <div style={{
+        background: '#e0e5ec',
+        borderRadius: '20px',
+        padding: '20px',
+        boxShadow: '8px 8px 16px #b8bec7, -8px -8px 16px #ffffff',
+        marginBottom: '20px'
+      }}>
+        {/* Badge */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <div style={{
+            background: '#e0e5ec',
+            boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff',
+            borderRadius: '8px', padding: '3px 10px',
+            fontSize: '11px', fontWeight: '700', color: '#4CAF50'
+          }}>GET</div>
+          <code style={{ fontSize: '13px', color: '#444', fontWeight: '600' }}>/api/nglspam</code>
+          <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#999' }}>NGL Spam</span>
+        </div>
+
+        <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>
+          Kirim pesan anonim ke NGL link target secara cepat dan stabil
+        </p>
+
+        {/* Example */}
+        <div style={{
+          background: '#e0e5ec',
+          boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff',
+          borderRadius: '12px', padding: '10px 14px',
+          fontSize: '11px', color: '#888', marginBottom: '20px',
+          fontFamily: 'monospace'
+        }}>
+          GET /api/nglspam?username=egiuu&pesan=hai&jumlah=10
+        </div>
+
+        {/* Form */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div>
+            <label style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '8px' }}>NGL Link</label>
+            <input
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                background: '#e0e5ec',
+                boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff',
+                border: 'none', borderRadius: '12px',
+                padding: '12px 14px', fontSize: '13px', color: '#444',
+                outline: 'none'
+              }}
+              placeholder="https://ngl.link/egiuu1"
+              value={nglUrl}
+              onChange={e => setNglUrl(e.target.value)}
+            />
+            {nglUrl && (
+              <p style={{ fontSize: '11px', color: '#888', marginTop: '6px', paddingLeft: '4px' }}>
+                Username: <span style={{ color: '#4CAF50', fontWeight: '600' }}>{extractUsername(nglUrl)}</span>
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '8px' }}>Pesan</label>
+            <input
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                background: '#e0e5ec',
+                boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff',
+                border: 'none', borderRadius: '12px',
+                padding: '12px 14px', fontSize: '13px', color: '#444',
+                outline: 'none'
+              }}
+              placeholder="hai 👋"
+              value={pesan}
+              onChange={e => setPesan(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '8px' }}>Jumlah (max 100)</label>
+            <input
+              type="number"
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                background: '#e0e5ec',
+                boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff',
+                border: 'none', borderRadius: '12px',
+                padding: '12px 14px', fontSize: '13px', color: '#444',
+                outline: 'none'
+              }}
+              placeholder="5"
+              value={jumlah}
+              onChange={e => setJumlah(e.target.value)}
+            />
+          </div>
+
+          <button
+            onClick={handleNgl}
+            disabled={nglLoading || !nglUrl || !pesan}
+            style={{
+              background: '#e0e5ec',
+              boxShadow: nglLoading || !nglUrl || !pesan
+                ? 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff'
+                : '6px 6px 12px #b8bec7, -6px -6px 12px #ffffff',
+              border: 'none', borderRadius: '12px',
+              padding: '14px', fontSize: '14px', fontWeight: '700',
+              color: nglLoading || !nglUrl || !pesan ? '#aaa' : '#444',
+              cursor: nglLoading || !nglUrl || !pesan ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            {nglLoading ? 'Sending...' : 'Send Request'}
+          </button>
+
+          {nglResult && (
+            <div style={{
+              background: '#e0e5ec',
+              boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff',
+              borderRadius: '12px', padding: '14px'
+            }}>
+              <p style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Response</p>
+              <pre style={{ fontSize: '12px', color: '#4CAF50', margin: 0, overflow: 'auto' }}>
+                {JSON.stringify(nglResult, null, 2)}
+              </pre>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <p style={{ textAlign: 'center', fontSize: '11px', color: '#aaa', marginTop: '16px' }}>
+        Egii Apii — Made by SugengTeam
+      </p>
     </main>
   )
 }
