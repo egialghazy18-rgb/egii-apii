@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
   }
 
   const p62 = phone.startsWith('0') ? `62${phone.slice(1)}` : phone.startsWith('+') ? phone.slice(1) : phone
+  const p08 = p62.startsWith('62') ? `0${p62.slice(2)}` : phone
 
   try {
     const res = await fetch(`https://wa.me/${p62}`, {
@@ -19,13 +20,20 @@ export async function GET(req: NextRequest) {
     })
 
     const html = await res.text()
-    const isActive = !html.includes('phone number shared via link is not on WhatsApp') && !html.includes('tidak menggunakan WhatsApp')
+    const isActive = !html.includes('phone number shared via link is not on WhatsApp') && 
+                     !html.includes('tidak menggunakan WhatsApp') &&
+                     html.includes('wa.me') &&
+                     res.status === 200
 
     return NextResponse.json({
       status: true,
-      phone: p62,
-      whatsapp: isActive,
-      message: isActive ? 'Nomor aktif di WhatsApp' : 'Nomor tidak terdaftar di WhatsApp',
+      data: {
+        phone_original: p08,
+        phone_intl: `+${p62}`,
+        whatsapp: isActive,
+        status: isActive ? '✅ Aktif di WhatsApp' : '❌ Tidak terdaftar di WhatsApp',
+        wa_link: `https://wa.me/${p62}`
+      },
       author: 'Egii Apii'
     })
   } catch (err: any) {

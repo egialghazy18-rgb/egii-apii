@@ -9,20 +9,21 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(`https://api.myquran.com/v2/sholat/kota/semua`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    })
-
-    // Pakai instaloader API publik
-    const igRes = await fetch(`https://www.instagram.com/api/v1/users/web_profile_info/?username=${username}`, {
+    const res = await fetch(`https://i.instagram.com/api/v1/users/web_profile_info/?username=${username}`, {
       headers: {
-        'User-Agent': 'Instagram 219.0.0.12.117 Android',
-        'Accept': 'application/json',
+        'User-Agent': 'Instagram 76.0.0.15.395 Android (24/7.0; 640dpi; 1440x2560; samsung; SM-G930F; herolte; samsungexynos8890; en_US; 138226743)',
+        'Accept': '*/*',
+        'Accept-Language': 'en-US',
         'X-IG-App-ID': '936619743392459',
+        'X-IG-Capabilities': '3brTvw==',
       }
     })
 
-    const data = await igRes.json()
+    if (!res.ok) {
+      return NextResponse.json({ status: false, message: `Instagram error: ${res.status}` }, { status: res.status })
+    }
+
+    const data = await res.json()
     const user = data?.data?.user
 
     if (!user) {
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
         posts: user.edge_owner_to_timeline_media?.count,
         is_private: user.is_private,
         is_verified: user.is_verified,
-        profile_pic: user.profile_pic_url_hd,
+        profile_pic: user.profile_pic_url_hd || user.profile_pic_url,
         external_url: user.external_url,
         category: user.category_name
       },
