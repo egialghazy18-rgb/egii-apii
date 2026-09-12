@@ -9,17 +9,21 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(`https://www.instagram.com/${username}/?__a=1&__d=dis`, {
+    const res = await fetch(`https://api.myquran.com/v2/sholat/kota/semua`, {
+      headers: { 'User-Agent': 'Mozilla/5.0' }
+    })
+
+    // Pakai instaloader API publik
+    const igRes = await fetch(`https://www.instagram.com/api/v1/users/web_profile_info/?username=${username}`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 13; Redmi Note 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+        'User-Agent': 'Instagram 219.0.0.12.117 Android',
         'Accept': 'application/json',
         'X-IG-App-ID': '936619743392459',
-        'Cookie': 'ig_did=1; ig_nonce=1;'
       }
     })
 
-    const data = await res.json()
-    const user = data?.graphql?.user || data?.data?.user
+    const data = await igRes.json()
+    const user = data?.data?.user
 
     if (!user) {
       return NextResponse.json({ status: false, message: 'User tidak ditemukan' }, { status: 404 })
@@ -36,8 +40,9 @@ export async function GET(req: NextRequest) {
         posts: user.edge_owner_to_timeline_media?.count,
         is_private: user.is_private,
         is_verified: user.is_verified,
-        profile_pic: user.profile_pic_url_hd || user.profile_pic_url,
-        external_url: user.external_url
+        profile_pic: user.profile_pic_url_hd,
+        external_url: user.external_url,
+        category: user.category_name
       },
       author: 'Egii Apii'
     })
