@@ -9,9 +9,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(`https://www.instagram.com/${username}/`, {
+    // Coba via picuki (mirror publik instagram)
+    const res = await fetch(`https://picuki.com/profile/${username}`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html',
         'Accept-Language': 'en-US,en;q=0.9',
       }
@@ -19,33 +20,35 @@ export async function GET(req: NextRequest) {
 
     const html = await res.text()
 
-    const fullNameMatch = html.match(/<meta property="og:title" content="([^"]+)"/)
-    const descMatch = html.match(/<meta property="og:description" content="([^"]+)"/)
-
-    if (!fullNameMatch) {
-      return NextResponse.json({ status: false, message: 'User tidak ditemukan' }, { status: 404 })
+    if (html.includes('profile-name') === false) {
+      return NextResponse.json({ status: false, message: 'User tidak ditemukan atau akun private' }, { status: 404 })
     }
 
-    const desc = descMatch?.[1] || ''
-    const followersMatch = desc.match(/([\d,.]+[KMB]?)\s*Followers/)
-    const followingMatch = desc.match(/([\d,.]+[KMB]?)\s*Following/)
-    const postsMatch = desc.match(/([\d,.]+[KMB]?)\s*Posts/)
+    const nameMatch = html.match(/<h1 class="profile-name">([^<]+)<\/h1>/)
+    const usernameMatch = html.match(/<h2 class="profile-nickname">([^<]+)<\/h2>/)
+    const imgMatch = html.match(/<div class="profile-avatar">\s*<img src="([^"]+)"/)
+    const bioMatch = html.match(/<div class="profile-description">([^<]+)<\/div>/)
 
-    const fullName = fullNameMatch[1]
-      .replace(/ • Instagram$/, '')
-      .replace(/ \(@[^)]+\)$/, '')
-      .trim()
+    const statsMatches = [...html.matchAll(/<span class="following-count">([^<]+)<\/span>/g)]
+    const followers = statsMatches[0]?.[1]?.trim() || '0'
+    const following = statsMatches[1]?.[1]?.trim() || '0'
+    const posts = statsMatches[2]?.[1]?.trim() || '0'
+
+    const isVerified = html.includes('profile-verified') || html.includes('verified-icon')
+    const isPrivate = html.includes('private-account') || html.includes('This Account is Private')
 
     return NextResponse.json({
       status: true,
       data: {
         username,
-        full_name: fullName,
-        followers: followersMatch?.[1] || '0',
-        following: followingMatch?.[1] || '0',
-        posts: postsMatch?.[1] || '0',
-        is_private: html.includes('"is_private":true'),
-        is_verified: html.includes('"is_verified":true'),
+        full_name: nameMatch?.[1]?.trim() || username,
+        bio: bioMatch?.[1]?.trim() || null,
+        followers,
+        following,
+        posts,
+        is_private: isPrivate,
+        is_verified: isVerified,
+        profile_pic: imgMatch?.[1] || null,
         ig_url: `https://instagram.com/${username}`
       },
       author: 'Egii Apii'
