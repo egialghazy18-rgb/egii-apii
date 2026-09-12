@@ -9,11 +9,40 @@ const neu = {
   response: { background: '#e0e5ec', boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff', borderRadius: '12px', padding: '14px' } as React.CSSProperties
 }
 
+function Badge({ color, text }: any) {
+  return <div style={{ background: '#e0e5ec', boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff', borderRadius: '8px', padding: '3px 10px', fontSize: '11px', fontWeight: '700', color }}>{text}</div>
+}
+
 function Btn({ onClick, disabled, loading, label }: any) {
   return (
     <button onClick={onClick} disabled={disabled} style={{ width: '100%', background: '#e0e5ec', boxShadow: disabled ? 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff' : '6px 6px 12px #b8bec7, -6px -6px 12px #ffffff', border: 'none', borderRadius: '12px', padding: '14px', fontSize: '14px', fontWeight: '700', color: disabled ? '#aaa' : '#444', cursor: disabled ? 'not-allowed' : 'pointer' }}>
       {loading ? 'Loading...' : label}
     </button>
+  )
+}
+
+function Card({ badge, color, path, name, desc, example, children }: any) {
+  return (
+    <div style={neu.card}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+        <Badge color={color} text="GET" />
+        <code style={{ fontSize: '13px', color: '#444', fontWeight: '600' }}>{path}</code>
+        <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#999' }}>{name}</span>
+      </div>
+      <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>{desc}</p>
+      <div style={neu.example}>{example}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>{children}</div>
+    </div>
+  )
+}
+
+function Result({ data, color }: any) {
+  if (!data) return null
+  return (
+    <div style={neu.response}>
+      <p style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Response</p>
+      <pre style={{ fontSize: '12px', color, margin: 0, overflow: 'auto' }}>{JSON.stringify(data, null, 2)}</pre>
+    </div>
   )
 }
 
@@ -23,10 +52,18 @@ export default function Home() {
   const [nglJumlah, setNglJumlah] = useState('5')
   const [nglResult, setNglResult] = useState<any>(null)
   const [nglLoading, setNglLoading] = useState(false)
-  const [phone, setPhone] = useState('')
-  const [otpJumlah, setOtpJumlah] = useState('1')
-  const [otpResult, setOtpResult] = useState<any>(null)
-  const [otpLoading, setOtpLoading] = useState(false)
+
+  const [igUser, setIgUser] = useState('')
+  const [igResult, setIgResult] = useState<any>(null)
+  const [igLoading, setIgLoading] = useState(false)
+
+  const [tokUser, setTokUser] = useState('')
+  const [tokResult, setTokResult] = useState<any>(null)
+  const [tokLoading, setTokLoading] = useState(false)
+
+  const [waPhone, setWaPhone] = useState('')
+  const [waResult, setWaResult] = useState<any>(null)
+  const [waLoading, setWaLoading] = useState(false)
 
   const extractUsername = (url: string) => {
     try { return new URL(url).pathname.replace('/', '').split('?')[0] }
@@ -39,10 +76,22 @@ export default function Home() {
     setNglResult(await res.json()); setNglLoading(false)
   }
 
-  const handleOtp = async () => {
-    setOtpLoading(true); setOtpResult(null)
-    const res = await fetch(`/api/otpspam?phone=${phone}&jumlah=${otpJumlah}`)
-    setOtpResult(await res.json()); setOtpLoading(false)
+  const handleIg = async () => {
+    setIgLoading(true); setIgResult(null)
+    const res = await fetch(`/api/stalkg?username=${igUser}`)
+    setIgResult(await res.json()); setIgLoading(false)
+  }
+
+  const handleTok = async () => {
+    setTokLoading(true); setTokResult(null)
+    const res = await fetch(`/api/stalktok?username=${tokUser}`)
+    setTokResult(await res.json()); setTokLoading(false)
+  }
+
+  const handleWa = async () => {
+    setWaLoading(true); setWaResult(null)
+    const res = await fetch(`/api/wacheck?phone=${waPhone}`)
+    setWaResult(await res.json()); setWaLoading(false)
   }
 
   return (
@@ -60,51 +109,38 @@ export default function Home() {
 
       <div style={{ marginBottom: '24px', paddingLeft: '4px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#333', margin: '0 0 6px' }}>API Documentation</h1>
-        <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>Base URL: <code style={{ background: '#e0e5ec', boxShadow: 'inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff', padding: '2px 8px', borderRadius: '6px', fontSize: '12px', color: '#555' }}>egii-tools-api.vercel.app</code></p>
+        <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>Base URL: <code style={{ background: '#e0e5ec', boxShadow: 'inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff', padding: '2px 8px', borderRadius: '6px', fontSize: '12px', color: '#555' }}>egii-2.vercel.app</code></p>
       </div>
 
-      {/* NGL Card */}
-      <div style={neu.card}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-          <div style={{ background: '#e0e5ec', boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff', borderRadius: '8px', padding: '3px 10px', fontSize: '11px', fontWeight: '700', color: '#4CAF50' }}>GET</div>
-          <code style={{ fontSize: '13px', color: '#444', fontWeight: '600' }}>/api/nglspam</code>
-          <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#999' }}>NGL Spam</span>
+      <Card color="#4CAF50" path="/api/nglspam" name="NGL Spam" desc="Kirim pesan anonim ke NGL link target" example="GET /api/nglspam?username=egiuu&pesan=hai&jumlah=10">
+        <div>
+          <label style={neu.label}>NGL Link</label>
+          <input style={neu.input} placeholder="https://ngl.link/egiuu1" value={nglUrl} onChange={e => setNglUrl(e.target.value)} />
+          {nglUrl && <p style={{ fontSize: '11px', color: '#888', marginTop: '6px' }}>Username: <span style={{ color: '#4CAF50', fontWeight: '600' }}>{extractUsername(nglUrl)}</span></p>}
         </div>
-        <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Kirim pesan anonim ke NGL link target</p>
-        <div style={neu.example}>GET /api/nglspam?username=egiuu&pesan=hai&jumlah=10</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div>
-            <label style={neu.label}>NGL Link</label>
-            <input style={neu.input} placeholder="https://ngl.link/egiuu1" value={nglUrl} onChange={e => setNglUrl(e.target.value)} />
-            {nglUrl && <p style={{ fontSize: '11px', color: '#888', marginTop: '6px' }}>Username: <span style={{ color: '#4CAF50', fontWeight: '600' }}>{extractUsername(nglUrl)}</span></p>}
-          </div>
-          <div><label style={neu.label}>Pesan</label><input style={neu.input} placeholder="hai 👋" value={nglPesan} onChange={e => setNglPesan(e.target.value)} /></div>
-          <div><label style={neu.label}>Jumlah (max 50)</label><input type="number" style={neu.input} placeholder="5" value={nglJumlah} onChange={e => setNglJumlah(e.target.value)} /></div>
-          <Btn onClick={handleNgl} disabled={nglLoading || !nglUrl || !nglPesan} loading={nglLoading} label="Send NGL Spam" />
-          {nglResult && <div style={neu.response}><p style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Response</p><pre style={{ fontSize: '12px', color: '#4CAF50', margin: 0, overflow: 'auto' }}>{JSON.stringify(nglResult, null, 2)}</pre></div>}
-        </div>
-      </div>
+        <div><label style={neu.label}>Pesan</label><input style={neu.input} placeholder="hai 👋" value={nglPesan} onChange={e => setNglPesan(e.target.value)} /></div>
+        <div><label style={neu.label}>Jumlah (max 50)</label><input type="number" style={neu.input} placeholder="5" value={nglJumlah} onChange={e => setNglJumlah(e.target.value)} /></div>
+        <Btn onClick={handleNgl} disabled={nglLoading || !nglUrl || !nglPesan} loading={nglLoading} label="Send NGL Spam" />
+        <Result data={nglResult} color="#4CAF50" />
+      </Card>
 
-      {/* OTP Card */}
-      <div style={neu.card}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-          <div style={{ background: '#e0e5ec', boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff', borderRadius: '8px', padding: '3px 10px', fontSize: '11px', fontWeight: '700', color: '#FF9800' }}>GET</div>
-          <code style={{ fontSize: '13px', color: '#444', fontWeight: '600' }}>/api/otpspam</code>
-          <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#999' }}>OTP Spam</span>
-        </div>
-        <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Spam OTP ke nomor HP target via multi platform</p>
-        <div style={neu.example}>GET /api/otpspam?phone=08xxxxxxxxxx&jumlah=3</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div><label style={neu.label}>Nomor HP Target</label><input style={neu.input} placeholder="08xxxxxxxxxx" value={phone} onChange={e => setPhone(e.target.value)} /></div>
-          <div>
-            <label style={neu.label}>Jumlah Round (max 10)</label>
-            <input type="number" style={neu.input} placeholder="1" value={otpJumlah} onChange={e => setOtpJumlah(e.target.value)} />
-            <p style={{ fontSize: '11px', color: '#888', marginTop: '6px' }}>1 round = 6 platform sekaligus</p>
-          </div>
-          <Btn onClick={handleOtp} disabled={otpLoading || !phone} loading={otpLoading} label="Send OTP Spam" />
-          {otpResult && <div style={neu.response}><p style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Response</p><pre style={{ fontSize: '12px', color: '#FF9800', margin: 0, overflow: 'auto' }}>{JSON.stringify(otpResult, null, 2)}</pre></div>}
-        </div>
-      </div>
+      <Card color="#E1306C" path="/api/stalkg" name="Stalk Instagram" desc="Ambil info publik akun Instagram" example="GET /api/stalkg?username=cristiano">
+        <div><label style={neu.label}>Username Instagram</label><input style={neu.input} placeholder="cristiano" value={igUser} onChange={e => setIgUser(e.target.value)} /></div>
+        <Btn onClick={handleIg} disabled={igLoading || !igUser} loading={igLoading} label="Stalk Instagram" />
+        <Result data={igResult} color="#E1306C" />
+      </Card>
+
+      <Card color="#000000" path="/api/stalktok" name="Stalk TikTok" desc="Ambil info publik akun TikTok" example="GET /api/stalktok?username=khaby.lame">
+        <div><label style={neu.label}>Username TikTok</label><input style={neu.input} placeholder="khaby.lame" value={tokUser} onChange={e => setTokUser(e.target.value)} /></div>
+        <Btn onClick={handleTok} disabled={tokLoading || !tokUser} loading={tokLoading} label="Stalk TikTok" />
+        <Result data={tokResult} color="#333" />
+      </Card>
+
+      <Card color="#25D366" path="/api/wacheck" name="WA Check" desc="Cek nomor HP aktif di WhatsApp atau tidak" example="GET /api/wacheck?phone=08xxxxxxxxxx">
+        <div><label style={neu.label}>Nomor HP</label><input style={neu.input} placeholder="08xxxxxxxxxx" value={waPhone} onChange={e => setWaPhone(e.target.value)} /></div>
+        <Btn onClick={handleWa} disabled={waLoading || !waPhone} loading={waLoading} label="Check WhatsApp" />
+        <Result data={waResult} color="#25D366" />
+      </Card>
 
       <p style={{ textAlign: 'center', fontSize: '11px', color: '#aaa', marginTop: '8px' }}>Egii Apii — Made by SugengTeam</p>
     </main>
