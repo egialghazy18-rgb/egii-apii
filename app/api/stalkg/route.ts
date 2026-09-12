@@ -9,46 +9,80 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Coba via picuki (mirror publik instagram)
-    const res = await fetch(`https://picuki.com/profile/${username}`, {
+    const res = await fetch(`https://www.instagram.com/api/v1/users/web_profile_info/?username=${username}`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html',
-        'Accept-Language': 'en-US,en;q=0.9',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 9; SM-A505F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Mobile Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'X-IG-App-ID': '936619743392459',
+        'X-ASBD-ID': '198387',
+        'X-IG-WWW-Claim': '0',
+        'Origin': 'https://www.instagram.com',
+        'Referer': 'https://www.instagram.com/',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
       }
     })
 
-    const html = await res.text()
+    if (!res.ok) {
+      // Fallback: scrape HTML meta tag
+      const htmlRes = await fetch(`https://www.instagram.com/${username}/`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+        }
+      })
+      const html = await htmlRes.text()
+      const titleMatch = html.match(/<title>([^<]+)<\/title>/)
+      const descMatch = html.match(/<meta name="description" content="([^"]+)"/)
 
-    if (html.includes('profile-name') === false) {
-      return NextResponse.json({ status: false, message: 'User tidak ditemukan atau akun private' }, { status: 404 })
+      if (!titleMatch || titleMatch[1].includes('Page Not Found')) {
+        return NextResponse.json({ status: false, message: 'User tidak ditemukan' }, { status: 404 })
+      }
+
+      const desc = descMatch?.[1] || ''
+      const nums = desc.match(/[\d,]+/g) || []
+      const parseN = (s: string) => parseInt(s.replace(/,/g, '')) || 0
+
+      const fullName = titleMatch[1].replace(/\(@[^)]+\)/,'').replace('• Instagram','').trim()
+
+      return NextResponse.json({
+        status: true,
+        data: {
+          username,
+          full_name: fullName,
+          bio: desc.split(' - ')[1]?.trim() || null,
+          followers: nums[0] ? parseN(nums[0]) : 0,
+          following: nums[1] ? parseN(nums[1]) : 0,
+          posts: nums[2] ? parseN(nums[2]) : 0,
+          is_private: html.includes('"is_private":true'),
+          is_verified: html.includes('"is_verified":true'),
+          profile_pic: null,
+          ig_url: `https://instagram.com/${username}`
+        },
+        author: 'Egii Apii'
+      })
     }
 
-    const nameMatch = html.match(/<h1 class="profile-name">([^<]+)<\/h1>/)
-    const usernameMatch = html.match(/<h2 class="profile-nickname">([^<]+)<\/h2>/)
-    const imgMatch = html.match(/<div class="profile-avatar">\s*<img src="([^"]+)"/)
-    const bioMatch = html.match(/<div class="profile-description">([^<]+)<\/div>/)
+    const json = await res.json()
+    const user = json?.data?.user
 
-    const statsMatches = [...html.matchAll(/<span class="following-count">([^<]+)<\/span>/g)]
-    const followers = statsMatches[0]?.[1]?.trim() || '0'
-    const following = statsMatches[1]?.[1]?.trim() || '0'
-    const posts = statsMatches[2]?.[1]?.trim() || '0'
-
-    const isVerified = html.includes('profile-verified') || html.includes('verified-icon')
-    const isPrivate = html.includes('private-account') || html.includes('This Account is Private')
+    if (!user) {
+      return NextResponse.json({ status: false, message: 'User tidak ditemukan' }, { status: 404 })
+    }
 
     return NextResponse.json({
       status: true,
       data: {
-        username,
-        full_name: nameMatch?.[1]?.trim() || username,
-        bio: bioMatch?.[1]?.trim() || null,
-        followers,
-        following,
-        posts,
-        is_private: isPrivate,
-        is_verified: isVerified,
-        profile_pic: imgMatch?.[1] || null,
+        username: user.username,
+        full_name: user.full_name,
+        bio: user.biography || null,
+        followers: user.edge_followed_by?.count || 0,
+        following: user.edge_follow?.count || 0,
+        posts: user.edge_owner_to_timeline_media?.count || 0,
+        is_private: user.is_private,
+        is_verified: user.is_verified,
+        profile_pic: null,
         ig_url: `https://instagram.com/${username}`
       },
       author: 'Egii Apii'
