@@ -223,7 +223,7 @@ export default function Home() {
       <div style={{ ...neu, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <div style={{ fontWeight: '700', fontSize: '18px', color: '#333' }}>Egii Apii</div>
-          <div style={{ fontSize: '11px', color: '#888' }}>by SugengTeam</div>
+          <div style={{ fontSize: '11px', color: '#888' }}>by EgiiDev</div>
         </div>
         <div style={{ fontSize: '11px', color: '#888' }}>v1.0.0</div>
       </div>
@@ -390,7 +390,7 @@ export default function Home() {
             <div style={{ fontWeight: '700', fontSize: '14px', color: '#333', marginBottom: '12px' }}>🚀 Projects</div>
             {[
               { name: 'Egii Apii', desc: 'API publik untuk stalk sosmed, spam NGL, cek WA, dan lainnya', color: '#5c6bc0' },
-              { name: 'SugengTeam', desc: 'Tim developer yang fokus bikin tools dan bot automation', color: '#ff7043' },
+              { name: 'EgiiDev', desc: 'Tim developer yang fokus bikin tools dan bot automation', color: '#ff7043' },
             ].map(p => (
               <div key={p.name} style={{ background: '#e0e5ec', borderRadius: '12px', padding: '12px', marginBottom: '10px', boxShadow: '3px 3px 6px #b8bec7, -2px -2px 4px #ffffff' }}>
                 <div style={{ fontWeight: '700', fontSize: '13px', color: p.color }}>{p.name}</div>
@@ -419,7 +419,7 @@ export default function Home() {
         </div>
       )}
 
-      <p style={{ textAlign: 'center', fontSize: '11px', color: '#aaa', marginTop: '8px' }}>Egii Apii — Made by SugengTeam</p>
+      <p style={{ textAlign: 'center', fontSize: '11px', color: '#aaa', marginTop: '8px' }}>Egii Apii — Made by EgiiDev</p>
     </main>
   )
 }
