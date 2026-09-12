@@ -10,47 +10,48 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(`https://liquidpay.com.sg/api/v2/check_user?game_id=mobilelegends&user_id=${userid}&zone_id=${zoneid}`, {
+    const res = await fetch('https://order.mobilelegends.com/api/user/getUserByRoleId', {
+      method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0',
-        'Accept': 'application/json'
-      }
+        'Origin': 'https://order.mobilelegends.com',
+        'Referer': 'https://order.mobilelegends.com/'
+      },
+      body: JSON.stringify({ roleId: userid, zoneId: zoneid })
     })
 
-    const data = await res.json()
+    const text = await res.text()
+    
+    try {
+      const data = JSON.parse(text)
+      const username = data?.data?.username || data?.username || data?.name
 
-    if (data?.username || data?.data?.username) {
-      const username = data?.username || data?.data?.username
-      return NextResponse.json({
-        status: true,
-        data: {
-          username,
-          user_id: userid,
-          zone_id: zoneid,
-          game: 'Mobile Legends: Bang Bang'
-        },
-        author: 'EgiiDev'
-      })
-    }
+      if (username) {
+        return NextResponse.json({
+          status: true,
+          data: { username, user_id: userid, zone_id: zoneid, game: 'Mobile Legends: Bang Bang' },
+          author: 'EgiiDev'
+        })
+      }
+    } catch {}
 
-    // Fallback: smilegate
-    const res2 = await fetch(`https://games.mobileapi.co/api/check?game=mobilelegend&userid=${userid}&zoneid=${zoneid}`)
+    // Fallback: codashop
+    const res2 = await fetch(`https://order.codashop.com/api-id/product.list?voucherPricePoint.id=167&voucherPricePoint.price=1000&voucherPricePoint.variationId=&userId=${userid}&zoneId=${zoneid}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0' }
+    })
     const data2 = await res2.json()
+    const username2 = data2?.confirmationFields?.username
 
-    if (data2?.name || data2?.username) {
+    if (username2) {
       return NextResponse.json({
         status: true,
-        data: {
-          username: data2?.name || data2?.username,
-          user_id: userid,
-          zone_id: zoneid,
-          game: 'Mobile Legends: Bang Bang'
-        },
+        data: { username: username2, user_id: userid, zone_id: zoneid, game: 'Mobile Legends: Bang Bang' },
         author: 'EgiiDev'
       })
     }
 
-    return NextResponse.json({ status: false, message: 'User tidak ditemukan, cek ID dan Zone ID' }, { status: 404 })
+    return NextResponse.json({ status: false, message: 'User tidak ditemukan' }, { status: 404 })
   } catch (err: any) {
     return NextResponse.json({ status: false, message: err.message }, { status: 500 })
   }
