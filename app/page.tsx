@@ -1,89 +1,155 @@
 'use client'
 import { useState } from 'react'
-import Image from 'next/image'
 
 const neu = {
-  card: { background: '#e0e5ec', borderRadius: '20px', padding: '20px', boxShadow: '8px 8px 16px #b8bec7, -8px -8px 16px #ffffff', marginBottom: '20px' } as React.CSSProperties,
-  input: { width: '100%', boxSizing: 'border-box' as const, background: '#e0e5ec', boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff', border: 'none', borderRadius: '12px', padding: '12px 14px', fontSize: '13px', color: '#444', outline: 'none' } as React.CSSProperties,
-  label: { fontSize: '11px', color: '#888', textTransform: 'uppercase' as const, letterSpacing: '1px', display: 'block', marginBottom: '8px' } as React.CSSProperties,
-  example: { background: '#e0e5ec', boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff', borderRadius: '12px', padding: '10px 14px', fontSize: '11px', color: '#888', marginBottom: '20px', fontFamily: 'monospace' } as React.CSSProperties,
-  response: { background: '#e0e5ec', boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff', borderRadius: '12px', padding: '14px' } as React.CSSProperties
-}
+  background: '#e0e5ec',
+  borderRadius: '20px',
+  padding: '20px',
+  boxShadow: '8px 8px 16px #b8bec7, -8px -8px 16px #ffffff',
+  marginBottom: '20px',
+} as React.CSSProperties
+
+const neu2 = {
+  background: '#e0e5ec',
+  boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff',
+  borderRadius: '12px',
+  padding: '10px 14px',
+  fontSize: '13px',
+  color: '#888',
+  marginBottom: '8px',
+} as React.CSSProperties
+
+const neuInput = {
+  background: '#e0e5ec',
+  boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff',
+  borderRadius: '12px',
+  padding: '14px',
+  fontSize: '14px',
+  color: '#444',
+  outline: 'none',
+  border: 'none',
+  width: '100%',
+} as React.CSSProperties
 
 function Btn({ onClick, disabled, loading, label, color }: any) {
   return (
-    <button onClick={onClick} disabled={disabled} style={{ width: '100%', background: disabled ? '#e0e5ec' : color || '#e0e5ec', boxShadow: disabled ? 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff' : '6px 6px 12px #b8bec7, -6px -6px 12px #ffffff', border: 'none', borderRadius: '12px', padding: '14px', fontSize: '14px', fontWeight: '700', color: disabled ? '#aaa' : color ? '#fff' : '#444', cursor: disabled ? 'not-allowed' : 'pointer' }}>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        width: '100%',
+        background: disabled ? '#e0e5ec' : color,
+        color: disabled ? '#aaa' : '#fff',
+        border: 'none',
+        borderRadius: '12px',
+        padding: '14px',
+        fontWeight: '700',
+        fontSize: '14px',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        boxShadow: disabled ? 'none' : '4px 4px 8px #b8bec7, -2px -2px 6px #ffffff',
+        marginTop: '8px',
+      }}
+    >
       {loading ? 'Loading...' : label}
     </button>
   )
 }
 
-function ProfileCard({ data, color, type }: any) {
-  if (!data?.status || !data?.data) return null
+function WaCard({ data }: any) {
+  if (!data?.status) return null
   const d = data.data
   return (
-    <div style={neu.response}>
-      {/* Profile pic */}
-      {d.profile_pic && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
-          <img
-            src={d.profile_pic}
-            alt="profile"
-            style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', boxShadow: '4px 4px 8px #b8bec7, -4px -4px 8px #ffffff' }}
-            onError={(e: any) => e.target.style.display = 'none'}
-          />
-        </div>
-      )}
-      {/* Name */}
-      <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-        <div style={{ fontWeight: '700', fontSize: '16px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-          {d.full_name || d.nickname || d.username}
-          {d.is_verified && <span style={{ color, fontSize: '14px' }}>✓</span>}
-        </div>
-        <div style={{ fontSize: '12px', color: '#888' }}>@{d.username}</div>
-        {d.is_private && <div style={{ fontSize: '11px', color: '#f44', marginTop: '4px' }}>🔒 Private</div>}
+    <div style={{ ...neu2, marginTop: '12px' }}>
+      <div style={{ fontSize: '32px', textAlign: 'center', marginBottom: '8px' }}>
+        {d.whatsapp ? '✅' : '❌'}
       </div>
-      {/* Bio */}
-      {d.bio && <div style={{ fontSize: '12px', color: '#555', textAlign: 'center', marginBottom: '16px', padding: '0 8px' }}>{d.bio}</div>}
-      {/* Stats */}
-      <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '12px' }}>
-        {d.followers !== undefined && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontWeight: '700', fontSize: '16px', color: '#333' }}>{Number(d.followers).toLocaleString()}</div>
-            <div style={{ fontSize: '11px', color: '#888' }}>Followers</div>
-          </div>
-        )}
-        {d.following !== undefined && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontWeight: '700', fontSize: '16px', color: '#333' }}>{Number(d.following).toLocaleString()}</div>
-            <div style={{ fontSize: '11px', color: '#888' }}>Following</div>
-          </div>
-        )}
-        {(d.posts !== undefined || d.videos !== undefined) && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontWeight: '700', fontSize: '16px', color: '#333' }}>{Number(d.posts || d.videos).toLocaleString()}</div>
-            <div style={{ fontSize: '11px', color: '#888' }}>{type === 'tiktok' ? 'Videos' : 'Posts'}</div>
-          </div>
-        )}
-        {d.likes !== undefined && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontWeight: '700', fontSize: '16px', color: '#333' }}>{Number(d.likes).toLocaleString()}</div>
-            <div style={{ fontSize: '11px', color: '#888' }}>Likes</div>
+      <div style={{ textAlign: 'center', fontWeight: '700', fontSize: '15px', color: d.whatsapp ? '#25D366' : '#f44' }}>
+        {d.status}
+      </div>
+      <div style={{ marginTop: '10px', fontSize: '13px', color: '#555' }}>
+        <div>📱 <b>Nomor:</b> {d.phone_original}</div>
+        <div>🌐 <b>Internasional:</b> {d.phone_intl}</div>
+        {d.whatsapp && (
+          <div style={{ marginTop: '8px', textAlign: 'center' }}>
+            <a href={d.wa_link} target="_blank" style={{ color: '#25D366', fontWeight: '700', textDecoration: 'none' }}>
+              💬 Chat via WhatsApp
+            </a>
           </div>
         )}
       </div>
-      {d.external_url && <div style={{ fontSize: '11px', color, textAlign: 'center' }}>{d.external_url}</div>}
     </div>
   )
 }
 
-function WaCard({ data }: any) {
+function IgCard({ data }: any) {
   if (!data?.status) return null
+  const d = data.data
   return (
-    <div style={{ ...neu.response, textAlign: 'center' }}>
-      <div style={{ fontSize: '48px', marginBottom: '12px' }}>{data.whatsapp ? '✅' : '❌'}</div>
-      <div style={{ fontWeight: '700', fontSize: '16px', color: '#333', marginBottom: '4px' }}>{data.phone}</div>
-      <div style={{ fontSize: '13px', color: data.whatsapp ? '#25D366' : '#f44' }}>{data.message}</div>
+    <div style={{ ...neu2, marginTop: '12px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+        <div style={{ fontWeight: '700', fontSize: '15px', color: '#333' }}>
+          {d.full_name} {d.is_verified && '✅'}
+        </div>
+        <div style={{ color: '#888', fontSize: '12px' }}>@{d.username}</div>
+        {d.is_private && <div style={{ color: '#f44', fontSize: '11px' }}>🔒 Private</div>}
+      </div>
+      {d.bio && <div style={{ fontSize: '12px', color: '#555', textAlign: 'center', marginBottom: '8px' }}>{d.bio}</div>}
+      <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '8px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: '700', color: '#E1306C' }}>{d.followers}</div>
+          <div style={{ fontSize: '11px', color: '#888' }}>Followers</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: '700', color: '#E1306C' }}>{d.following}</div>
+          <div style={{ fontSize: '11px', color: '#888' }}>Following</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: '700', color: '#E1306C' }}>{d.posts}</div>
+          <div style={{ fontSize: '11px', color: '#888' }}>Posts</div>
+        </div>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <a href={d.ig_url} target="_blank" style={{ color: '#E1306C', fontWeight: '700', textDecoration: 'none' }}>
+          📸 Buka Instagram
+        </a>
+      </div>
+    </div>
+  )
+}
+
+function TokCard({ data }: any) {
+  if (!data?.status) return null
+  const d = data.data
+  return (
+    <div style={{ ...neu2, marginTop: '12px' }}>
+      {d.profile_pic && (
+        <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+          <img src={d.profile_pic} alt="profile" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} onError={(e: any) => e.target.style.display = 'none'} />
+        </div>
+      )}
+      <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+        <div style={{ fontWeight: '700', fontSize: '15px', color: '#333' }}>{d.nickname} {d.is_verified && '✅'}</div>
+        <div style={{ color: '#888', fontSize: '12px' }}>@{d.username}</div>
+      </div>
+      {d.bio && <div style={{ fontSize: '12px', color: '#555', textAlign: 'center', marginBottom: '8px' }}>{d.bio}</div>}
+      <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '8px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: '700', color: '#333' }}>{Number(d.followers).toLocaleString()}</div>
+          <div style={{ fontSize: '11px', color: '#888' }}>Followers</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: '700', color: '#333' }}>{Number(d.following).toLocaleString()}</div>
+          <div style={{ fontSize: '11px', color: '#888' }}>Following</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: '700', color: '#333' }}>{Number(d.videos).toLocaleString()}</div>
+          <div style={{ fontSize: '11px', color: '#888' }}>Videos</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: '700', color: '#333' }}>{Number(d.likes).toLocaleString()}</div>
+          <div style={{ fontSize: '11px', color: '#888' }}>Likes</div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -91,8 +157,8 @@ function WaCard({ data }: any) {
 function ErrorCard({ data }: any) {
   if (!data || data.status !== false) return null
   return (
-    <div style={{ ...neu.response, textAlign: 'center' }}>
-      <div style={{ fontSize: '13px', color: '#f44' }}>❌ {data.message}</div>
+    <div style={{ ...neu2, marginTop: '12px', color: '#f44', textAlign: 'center' }}>
+      ❌ {data.message}
     </div>
   )
 }
@@ -148,93 +214,101 @@ export default function Home() {
   return (
     <main style={{ minHeight: '100vh', background: '#e0e5ec', fontFamily: 'system-ui, sans-serif', padding: '24px 16px' }}>
       {/* Header */}
-      <div style={{ ...neu.card, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#e0e5ec', boxShadow: '4px 4px 8px #b8bec7, -4px -4px 8px #ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '18px', color: '#555' }}>E</div>
-          <div>
-            <div style={{ fontWeight: '700', fontSize: '16px', color: '#333' }}>Egii Apii</div>
-            <div style={{ fontSize: '11px', color: '#888' }}>by SugengTeam</div>
-          </div>
+      <div style={{ ...neu, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ fontWeight: '700', fontSize: '18px', color: '#333' }}>Egii Apii</div>
+          <div style={{ fontSize: '11px', color: '#888' }}>by SugengTeam</div>
         </div>
-        <div style={{ background: '#e0e5ec', borderRadius: '20px', padding: '4px 12px', boxShadow: 'inset 3px 3px 6px #b8bec7, inset -3px -3px 6px #ffffff', fontSize: '11px', color: '#888' }}>v1.0.0</div>
+        <div style={{ fontSize: '11px', color: '#888' }}>v1.0.0</div>
       </div>
 
       <div style={{ marginBottom: '24px', paddingLeft: '4px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#333', margin: '0 0 6px' }}>API Documentation</h1>
-        <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>Base URL: <code style={{ background: '#e0e5ec', boxShadow: 'inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff', padding: '2px 8px', borderRadius: '6px', fontSize: '12px', color: '#555' }}>egii-2.vercel.app</code></p>
+        <h1 style={{ fontWeight: '700', margin: '0 0 6px', color: '#333' }}>API Documentation</h1>
+        <p style={{ fontSize: '13px', color: '#888', margin: 0 }}>Base URL: <code style={{ ...neu2, display: 'inline', padding: '2px 8px', borderRadius: '6px' }}>egii-2.vercel.app</code></p>
       </div>
 
       {/* NGL */}
-      <div style={neu.card}>
+      <div style={neu}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
           <div style={{ background: '#e0e5ec', boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff', borderRadius: '8px', padding: '3px 10px', fontSize: '11px', fontWeight: '700', color: '#4CAF50' }}>GET</div>
           <code style={{ fontSize: '13px', color: '#444', fontWeight: '600' }}>/api/nglspam</code>
           <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#999' }}>NGL Spam</span>
         </div>
         <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Kirim pesan anonim ke NGL link target</p>
-        <div style={neu.example}>GET /api/nglspam?username=egiuu&pesan=hai&jumlah=10</div>
+        <div style={{ ...neu2 }}>GET /api/nglspam?username=eguupercent&pesan=hai&jumlah=5</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div>
-            <label style={neu.label}>NGL Link</label>
-            <input style={neu.input} placeholder="https://ngl.link/egiuu1" value={nglUrl} onChange={e => setNglUrl(e.target.value)} />
+            <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>NGL LINK</label>
+            <input style={neuInput} placeholder="https://ngl.link/eguu1" value={nglUrl} onChange={e => setNglUrl(e.target.value)} />
             {nglUrl && <p style={{ fontSize: '11px', color: '#888', marginTop: '6px' }}>Username: <span style={{ color: '#4CAF50', fontWeight: '600' }}>{extractUsername(nglUrl)}</span></p>}
           </div>
-          <div><label style={neu.label}>Pesan</label><input style={neu.input} placeholder="hai 👋" value={nglPesan} onChange={e => setNglPesan(e.target.value)} /></div>
-          <div><label style={neu.label}>Jumlah (max 50)</label><input type="number" style={neu.input} placeholder="5" value={nglJumlah} onChange={e => setNglJumlah(e.target.value)} /></div>
+          <div>
+            <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>PESAN</label>
+            <input style={neuInput} placeholder="hai 👋" value={nglPesan} onChange={e => setNglPesan(e.target.value)} />
+          </div>
+          <div>
+            <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>JUMLAH (MAX 50)</label>
+            <input style={neuInput} type="number" placeholder="5" value={nglJumlah} onChange={e => setNglJumlah(e.target.value)} />
+          </div>
           <Btn onClick={handleNgl} disabled={nglLoading || !nglUrl || !nglPesan} loading={nglLoading} label="Send NGL Spam" color="#4CAF50" />
-          {nglResult && (
-            <div style={neu.response}>
-              <pre style={{ fontSize: '12px', color: '#4CAF50', margin: 0, overflow: 'auto' }}>{JSON.stringify(nglResult, null, 2)}</pre>
-            </div>
-          )}
+          {nglResult && <div style={{ ...neu2 }}><pre style={{ fontSize: '12px', color: '#4CAF50', margin: 0, overflow: 'auto' }}>{JSON.stringify(nglResult, null, 2)}</pre></div>}
         </div>
       </div>
 
       {/* IG */}
-      <div style={neu.card}>
+      <div style={neu}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
           <div style={{ background: '#e0e5ec', boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff', borderRadius: '8px', padding: '3px 10px', fontSize: '11px', fontWeight: '700', color: '#E1306C' }}>GET</div>
           <code style={{ fontSize: '13px', color: '#444', fontWeight: '600' }}>/api/stalkg</code>
           <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#999' }}>Stalk Instagram</span>
         </div>
-        <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Ambil info publik akun Instagram lengkap dengan foto profil</p>
-        <div style={neu.example}>GET /api/stalkg?username=cristiano</div>
+        <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Ambil info publik akun Instagram</p>
+        <div style={{ ...neu2 }}>GET /api/stalkg?username=cristiano</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div><label style={neu.label}>Username Instagram</label><input style={neu.input} placeholder="cristiano" value={igUser} onChange={e => setIgUser(e.target.value)} /></div>
+          <div>
+            <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>USERNAME INSTAGRAM</label>
+            <input style={neuInput} placeholder="cristiano" value={igUser} onChange={e => setIgUser(e.target.value)} />
+          </div>
           <Btn onClick={handleIg} disabled={igLoading || !igUser} loading={igLoading} label="Stalk Instagram" color="#E1306C" />
-          <ProfileCard data={igResult} color="#E1306C" type="instagram" />
+          <IgCard data={igResult} />
           <ErrorCard data={igResult} />
         </div>
       </div>
 
       {/* TikTok */}
-      <div style={neu.card}>
+      <div style={neu}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
           <div style={{ background: '#e0e5ec', boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff', borderRadius: '8px', padding: '3px 10px', fontSize: '11px', fontWeight: '700', color: '#333' }}>GET</div>
           <code style={{ fontSize: '13px', color: '#444', fontWeight: '600' }}>/api/stalktok</code>
           <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#999' }}>Stalk TikTok</span>
         </div>
         <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Ambil info publik akun TikTok lengkap dengan foto profil</p>
-        <div style={neu.example}>GET /api/stalktok?username=khaby.lame</div>
+        <div style={{ ...neu2 }}>GET /api/stalktok?username=khaby.lame</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div><label style={neu.label}>Username TikTok</label><input style={neu.input} placeholder="khaby.lame" value={tokUser} onChange={e => setTokUser(e.target.value)} /></div>
+          <div>
+            <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>USERNAME TIKTOK</label>
+            <input style={neuInput} placeholder="khaby.lame" value={tokUser} onChange={e => setTokUser(e.target.value)} />
+          </div>
           <Btn onClick={handleTok} disabled={tokLoading || !tokUser} loading={tokLoading} label="Stalk TikTok" color="#333" />
-          <ProfileCard data={tokResult} color="#333" type="tiktok" />
+          <TokCard data={tokResult} />
           <ErrorCard data={tokResult} />
         </div>
       </div>
 
       {/* WA */}
-      <div style={neu.card}>
+      <div style={neu}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
           <div style={{ background: '#e0e5ec', boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff', borderRadius: '8px', padding: '3px 10px', fontSize: '11px', fontWeight: '700', color: '#25D366' }}>GET</div>
           <code style={{ fontSize: '13px', color: '#444', fontWeight: '600' }}>/api/wacheck</code>
           <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#999' }}>WA Check</span>
         </div>
         <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Cek nomor HP aktif di WhatsApp atau tidak</p>
-        <div style={neu.example}>GET /api/wacheck?phone=08xxxxxxxxxx</div>
+        <div style={{ ...neu2 }}>GET /api/wacheck?phone=08xxxxxxxxxx</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div><label style={neu.label}>Nomor HP</label><input style={neu.input} placeholder="08xxxxxxxxxx" value={waPhone} onChange={e => setWaPhone(e.target.value)} /></div>
+          <div>
+            <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600', letterSpacing: '0.5px' }}>NOMOR HP</label>
+            <input style={neuInput} placeholder="08xxxxxxxxxx" value={waPhone} onChange={e => setWaPhone(e.target.value)} />
+          </div>
           <Btn onClick={handleWa} disabled={waLoading || !waPhone} loading={waLoading} label="Check WhatsApp" color="#25D366" />
           <WaCard data={waResult} />
           <ErrorCard data={waResult} />
