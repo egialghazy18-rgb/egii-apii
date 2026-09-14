@@ -1,3 +1,4 @@
+cat > /mnt/user-data/outputs/page.tsx << 'ENDOFFILE'
 'use client'
 import { useState, useEffect } from 'react'
 
@@ -48,7 +49,7 @@ function WaCard({ data }: any) {
         <div>📱 <b>Nomor:</b> {d.phone_original}</div>
         <div>🌐 <b>Internasional:</b> {d.phone_intl}</div>
         <div>📡 <b>Operator:</b> {d.operator}</div>
-        <div>🗺️ <b>Wilayah:</b> {d.region}</div>
+        <div>🗺 <b>Wilayah:</b> {d.region}</div>
         {d.whatsapp && <div style={{ marginTop: '8px', textAlign: 'center' }}><a href={d.wa_link} target="_blank" style={{ color: '#25D366', fontWeight: '700', textDecoration: 'none' }}>💬 Chat via WhatsApp</a></div>}
       </div>
     </div>
@@ -218,7 +219,6 @@ function ServerTab() {
 
   return (
     <div>
-      {/* Overall Status */}
       <div style={{ ...neu, textAlign: 'center', background: 'linear-gradient(135deg, #1a1a2e, #16213e)', borderRadius: '20px' }}>
         <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px', letterSpacing: '2px', textTransform: 'uppercase' }}>System Status</div>
         <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: overallColor, margin: '0 auto 8px', boxShadow: `0 0 12px ${overallColor}, 0 0 24px ${overallColor}` }} />
@@ -244,7 +244,6 @@ function ServerTab() {
         </button>
       </div>
 
-      {/* Endpoint List */}
       {data?.endpoints?.map((ep: any) => {
         const sc = STATUS_COLORS[ep.status as keyof typeof STATUS_COLORS]
         return (
@@ -283,6 +282,7 @@ export default function Home() {
   const [mlId, setMlId] = useState(''); const [mlZone, setMlZone] = useState(''); const [mlResult, setMlResult] = useState<any>(null); const [mlLoading, setMlLoading] = useState(false)
   const [nglUrl, setNglUrl] = useState(''); const [nglPesan, setNglPesan] = useState(''); const [nglJumlah, setNglJumlah] = useState('5'); const [nglResult, setNglResult] = useState<any>(null); const [nglLoading, setNglLoading] = useState(false)
   const [waPhone, setWaPhone] = useState(''); const [waResult, setWaResult] = useState<any>(null); const [waLoading, setWaLoading] = useState(false)
+  const [deltaUrl, setDeltaUrl] = useState(''); const [deltaResult, setDeltaResult] = useState<any>(null); const [deltaLoading, setDeltaLoading] = useState(false)
 
   const extractUsername = (url: string) => {
     try { return new URL(url).pathname.replace('/', '').split('?')[0] }
@@ -295,12 +295,20 @@ export default function Home() {
     setResult(await res.json()); setLoading(false)
   }
 
+  const getDeltaKey = async () => {
+    setDeltaLoading(true)
+    setDeltaResult(null)
+    const res = await fetch(`/api/deltakey?url=${encodeURIComponent(deltaUrl)}`)
+    setDeltaResult(await res.json())
+    setDeltaLoading(false)
+  }
+
   const tabs = [
     { id: 'stalk', label: '👤 Stalk', color: '#5c6bc0' },
     { id: 'spam', label: '💬 Spam', color: '#4CAF50' },
     { id: 'tools', label: '🔧 Tools', color: '#25D366' },
-    { id: 'server', label: '🖥️ Server', color: '#0288d1' },
-    { id: 'dev', label: '👨‍💻 Dev', color: '#ff7043' },
+    { id: 'server', label: '🖥 Server', color: '#0288d1' },
+    { id: 'dev', label: '👨💻 Dev', color: '#ff7043' },
   ]
 
   return (
@@ -313,7 +321,6 @@ export default function Home() {
         <div style={{ fontSize: '11px', color: '#888' }}>v1.0.0</div>
       </div>
 
-      {/* Tab Nav */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '6px', marginBottom: '20px' }}>
         {tabs.map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ background: activeTab === t.id ? t.color : '#e0e5ec', color: activeTab === t.id ? '#fff' : '#888', border: 'none', borderRadius: '12px', padding: '10px 2px', fontWeight: '700', fontSize: '10px', cursor: 'pointer', boxShadow: activeTab === t.id ? `4px 4px 8px #b8bec7, 0 0 12px ${t.color}44` : 'inset 3px 3px 6px #b8bec7, inset -3px -3px 6px #ffffff', transition: 'all 0.2s' }}>
@@ -414,13 +421,48 @@ export default function Home() {
       )}
 
       {activeTab === 'tools' && (
-        <Section path="/api/wacheck" label="WA Check" color="#25D366">
-          <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Cek nomor HP aktif di WhatsApp + info operator</p>
-          <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>NOMOR HP</label>
-          <input style={neuInput} placeholder="08xxxxxxxxxx" value={waPhone} onChange={e => setWaPhone(e.target.value)} />
-          <Btn onClick={() => call(`/api/wacheck?phone=${waPhone}`, setWaResult, setWaLoading)} disabled={waLoading || !waPhone} loading={waLoading} label="✅ Check WhatsApp" color="#25D366" />
-          <WaCard data={waResult} /><ErrorCard data={waResult} />
-        </Section>
+        <>
+          <Section path="/api/wacheck" label="WA Check" color="#25D366">
+            <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Cek nomor HP aktif di WhatsApp + info operator</p>
+            <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>NOMOR HP</label>
+            <input style={neuInput} placeholder="08xxxxxxxxxx" value={waPhone} onChange={e => setWaPhone(e.target.value)} />
+            <Btn onClick={() => call(`/api/wacheck?phone=${waPhone}`, setWaResult, setWaLoading)} disabled={waLoading || !waPhone} loading={waLoading} label="✅ Check WhatsApp" color="#25D366" />
+            <WaCard data={waResult} /><ErrorCard data={waResult} />
+          </Section>
+
+          <Section path="/api/deltakey" label="Delta Key" color="#7c3aed">
+            <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Paste link dari Delta key system, bypass otomatis</p>
+            <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>DELTA LINK</label>
+            <input style={neuInput} placeholder="https://delta.link/..." value={deltaUrl} onChange={e => setDeltaUrl(e.target.value)} />
+            <Btn onClick={getDeltaKey} disabled={deltaLoading || !deltaUrl} loading={deltaLoading} label="⚡ Get Delta Key" color="#7c3aed" />
+            {deltaResult && deltaResult.status && (
+              <div style={{ ...neu2, marginTop: '12px' }}>
+                <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                  <div style={{ fontSize: '28px' }}>🔑</div>
+                  <div style={{ fontWeight: '700', fontSize: '14px', color: '#7c3aed', marginBottom: '6px' }}>Key Berhasil Didapat</div>
+                </div>
+                <div style={{ background: '#e0e5ec', borderRadius: '10px', padding: '10px 14px', boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <code style={{ flex: 1, fontSize: '12px', color: '#333', wordBreak: 'break-all' }}>{deltaResult.data?.key || deltaResult.key}</code>
+                  <button onClick={() => navigator.clipboard.writeText(deltaResult.data?.key || deltaResult.key)} style={{ background: '#7c3aed', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>Copy</button>
+                </div>
+                {deltaResult.note && (
+                  <div style={{ fontSize: '11px', color: '#ff9800', marginTop: '8px', textAlign: 'center' }}>⚠ {deltaResult.note}</div>
+                )}
+                {deltaResult.steps?.length > 1 && (
+                  <div style={{ marginTop: '10px' }}>
+                    <div style={{ fontSize: '11px', color: '#888', fontWeight: '700', marginBottom: '6px' }}>📋 STEPS ({deltaResult.steps.length})</div>
+                    {deltaResult.steps.map((s: string, i: number) => (
+                      <div key={i} style={{ fontSize: '10px', color: '#888', background: '#e0e5ec', borderRadius: '8px', padding: '6px 10px', marginBottom: '4px', boxShadow: 'inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff', wordBreak: 'break-all' }}>
+                        {i + 1}. {s}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            <ErrorCard data={deltaResult} />
+          </Section>
+        </>
       )}
 
       {activeTab === 'server' && <ServerTab />}
@@ -428,7 +470,7 @@ export default function Home() {
       {activeTab === 'dev' && (
         <div>
           <div style={{ ...neu, textAlign: 'center' }}>
-            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #ff7043, #5c6bc0)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', boxShadow: '4px 4px 8px #b8bec7, -2px -2px 6px #ffffff' }}>👨‍💻</div>
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #ff7043, #5c6bc0)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', boxShadow: '4px 4px 8px #b8bec7, -2px -2px 6px #ffffff' }}>👨💻</div>
             <div style={{ fontWeight: '700', fontSize: '20px', color: '#333' }}>Egiii</div>
             <div style={{ fontSize: '13px', color: '#888', marginBottom: '12px' }}>Full-Stack Developer & API Builder</div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -455,6 +497,7 @@ export default function Home() {
               { path: '/api/stalkml', desc: 'Stalk Mobile Legends', color: '#e8b800' },
               { path: '/api/wacheck', desc: 'Cek WhatsApp', color: '#25D366' },
               { path: '/api/nglspam', desc: 'NGL Spam', color: '#4CAF50' },
+              { path: '/api/deltakey', desc: 'Delta Key Bypass', color: '#7c3aed' },
             ].map(e => (
               <div key={e.path} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', background: '#e0e5ec', borderRadius: '10px', padding: '10px', boxShadow: '3px 3px 6px #b8bec7, -2px -2px 4px #ffffff' }}>
                 <div style={{ background: e.color, borderRadius: '6px', padding: '2px 8px', fontSize: '10px', fontWeight: '700', color: '#fff' }}>GET</div>
@@ -470,3 +513,4 @@ export default function Home() {
     </main>
   )
 }
+ENDOFFILE
