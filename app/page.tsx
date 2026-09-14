@@ -1,9 +1,16 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const neu = { background: '#e0e5ec', borderRadius: '20px', padding: '20px', boxShadow: '8px 8px 16px #b8bec7, -8px -8px 16px #ffffff', marginBottom: '20px' } as React.CSSProperties
 const neu2 = { background: '#e0e5ec', boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff', borderRadius: '12px', padding: '10px 14px', fontSize: '13px', color: '#888', marginBottom: '8px' } as React.CSSProperties
 const neuInput = { background: '#e0e5ec', boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff', borderRadius: '12px', padding: '14px', fontSize: '14px', color: '#444', outline: 'none', border: 'none', width: '100%' } as React.CSSProperties
+
+const STATUS_COLORS = {
+  ok: { bg: 'linear-gradient(135deg, #00c853, #69f0ae)', text: '#fff', label: '● Online', dot: '#00e676' },
+  slow: { bg: 'linear-gradient(135deg, #ff6f00, #ffd740)', text: '#fff', label: '● Lambat', dot: '#ffd740' },
+  error: { bg: 'linear-gradient(135deg, #c62828, #ef5350)', text: '#fff', label: '● Error', dot: '#ef5350' },
+  down: { bg: 'linear-gradient(135deg, #37474f, #78909c)', text: '#fff', label: '● Down', dot: '#78909c' },
+}
 
 function Btn({ onClick, disabled, loading, label, color }: any) {
   return (
@@ -26,8 +33,8 @@ function StatGrid({ items }: { items: { val: any, label: string }[] }) {
   )
 }
 
-function Avatar({ src, size = 80 }: { src: string, size?: number }) {
-  return <img src={src} alt="avatar" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', marginBottom: '10px', boxShadow: '4px 4px 8px #b8bec7' }} onError={(e: any) => e.target.style.display = 'none'} />
+function Avatar({ src }: { src: string }) {
+  return <img src={src} alt="avatar" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', marginBottom: '10px', boxShadow: '4px 4px 8px #b8bec7' }} onError={(e: any) => e.target.style.display = 'none'} />
 }
 
 function WaCard({ data }: any) {
@@ -104,7 +111,6 @@ function GithubCard({ data }: any) {
       <div style={{ color: '#888', fontSize: '12px', marginBottom: '4px' }}>@{d.username}</div>
       {d.bio && <div style={{ fontSize: '12px', color: '#555', margin: '6px 0', fontStyle: 'italic' }}>{d.bio}</div>}
       {d.location && <div style={{ fontSize: '12px', color: '#888' }}>📍 {d.location}</div>}
-      {d.company && <div style={{ fontSize: '12px', color: '#888' }}>🏢 {d.company}</div>}
       <StatGrid items={[{val: Number(d.followers).toLocaleString(), label: 'Followers'},{val: Number(d.following).toLocaleString(), label: 'Following'},{val: Number(d.public_repos).toLocaleString(), label: 'Repos'},{val: Number(d.total_stars).toLocaleString(), label: 'Stars'}]} />
       {d.top_repos?.length > 0 && (
         <div style={{ textAlign: 'left', marginTop: '8px' }}>
@@ -176,15 +182,91 @@ function ErrorCard({ data }: any) {
   )
 }
 
-function Section({ method = 'GET', path, label, color, children }: any) {
+function Section({ path, label, color, children }: any) {
   return (
     <div style={neu}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-        <div style={{ background: '#e0e5ec', boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff', borderRadius: '8px', padding: '3px 10px', fontSize: '11px', fontWeight: '700', color }}>{method}</div>
+        <div style={{ background: '#e0e5ec', boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff', borderRadius: '8px', padding: '3px 10px', fontSize: '11px', fontWeight: '700', color }}>GET</div>
         <code style={{ fontSize: '13px', color: '#444', fontWeight: '600' }}>{path}</code>
         <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#999' }}>{label}</span>
       </div>
       {children}
+    </div>
+  )
+}
+
+function ServerTab() {
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [lastCheck, setLastCheck] = useState<string | null>(null)
+
+  const check = async () => {
+    setLoading(true)
+    const res = await fetch('/api/status')
+    const json = await res.json()
+    setData(json)
+    setLastCheck(new Date().toLocaleTimeString('id-ID'))
+    setLoading(false)
+  }
+
+  useEffect(() => { check() }, [])
+
+  const s = data?.summary
+  const overall = !s ? 'loading' : s.down > 3 || s.error > 3 ? 'down' : s.slow > 0 || s.error > 0 || s.down > 0 ? 'slow' : 'ok'
+  const overallColor = overall === 'ok' ? '#00c853' : overall === 'slow' ? '#ff6f00' : overall === 'down' ? '#c62828' : '#888'
+  const overallLabel = overall === 'ok' ? 'Semua Sistem Normal' : overall === 'slow' ? 'Beberapa Layanan Bermasalah' : overall === 'down' ? 'Sistem Bermasalah' : 'Mengecek...'
+
+  return (
+    <div>
+      {/* Overall Status */}
+      <div style={{ ...neu, textAlign: 'center', background: 'linear-gradient(135deg, #1a1a2e, #16213e)', borderRadius: '20px' }}>
+        <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px', letterSpacing: '2px', textTransform: 'uppercase' }}>System Status</div>
+        <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: overallColor, margin: '0 auto 8px', boxShadow: `0 0 12px ${overallColor}, 0 0 24px ${overallColor}` }} />
+        <div style={{ fontWeight: '700', fontSize: '16px', color: '#fff', marginBottom: '4px' }}>{overallLabel}</div>
+        {lastCheck && <div style={{ fontSize: '11px', color: '#666' }}>Terakhir dicek: {lastCheck}</div>}
+        {s && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px', marginTop: '16px' }}>
+            {[
+              { val: s.ok, label: 'Online', color: '#00c853' },
+              { val: s.slow, label: 'Lambat', color: '#ffd740' },
+              { val: s.error, label: 'Error', color: '#ef5350' },
+              { val: s.down, label: 'Down', color: '#78909c' },
+            ].map(({ val, label, color }) => (
+              <div key={label} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '8px 4px' }}>
+                <div style={{ fontWeight: '700', fontSize: '18px', color }}>{val}</div>
+                <div style={{ fontSize: '10px', color: '#666' }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        <button onClick={check} disabled={loading} style={{ marginTop: '16px', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '8px 20px', fontSize: '12px', cursor: loading ? 'not-allowed' : 'pointer', fontWeight: '600' }}>
+          {loading ? '⟳ Mengecek...' : '↻ Refresh'}
+        </button>
+      </div>
+
+      {/* Endpoint List */}
+      {data?.endpoints?.map((ep: any) => {
+        const sc = STATUS_COLORS[ep.status as keyof typeof STATUS_COLORS]
+        return (
+          <div key={ep.name} style={{ background: '#e0e5ec', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px', boxShadow: '4px 4px 8px #b8bec7, -2px -2px 6px #ffffff', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: sc.dot, flexShrink: 0, boxShadow: `0 0 6px ${sc.dot}` }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: '700', fontSize: '13px', color: '#333' }}>{ep.name}</div>
+              <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>{ep.message}</div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ background: sc.bg, borderRadius: '8px', padding: '3px 10px', fontSize: '10px', fontWeight: '700', color: sc.text, marginBottom: '4px' }}>{sc.label}</div>
+              <div style={{ fontSize: '10px', color: '#aaa' }}>{ep.latency}ms</div>
+            </div>
+          </div>
+        )
+      })}
+
+      {loading && !data && (
+        <div style={{ textAlign: 'center', color: '#888', padding: '40px', fontSize: '13px' }}>
+          ⟳ Mengecek semua endpoint...
+        </div>
+      )}
     </div>
   )
 }
@@ -217,6 +299,7 @@ export default function Home() {
     { id: 'stalk', label: '👤 Stalk', color: '#5c6bc0' },
     { id: 'spam', label: '💬 Spam', color: '#4CAF50' },
     { id: 'tools', label: '🔧 Tools', color: '#25D366' },
+    { id: 'server', label: '🖥️ Server', color: '#0288d1' },
     { id: 'dev', label: '👨‍💻 Dev', color: '#ff7043' },
   ]
 
@@ -230,9 +313,10 @@ export default function Home() {
         <div style={{ fontSize: '11px', color: '#888' }}>v1.0.0</div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px', marginBottom: '20px' }}>
+      {/* Tab Nav */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '6px', marginBottom: '20px' }}>
         {tabs.map(t => (
-          <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ background: activeTab === t.id ? t.color : '#e0e5ec', color: activeTab === t.id ? '#fff' : '#888', border: 'none', borderRadius: '14px', padding: '10px 4px', fontWeight: '700', fontSize: '11px', cursor: 'pointer', boxShadow: activeTab === t.id ? '4px 4px 8px #b8bec7' : 'inset 3px 3px 6px #b8bec7, inset -3px -3px 6px #ffffff', transition: 'all 0.2s' }}>
+          <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ background: activeTab === t.id ? t.color : '#e0e5ec', color: activeTab === t.id ? '#fff' : '#888', border: 'none', borderRadius: '12px', padding: '10px 2px', fontWeight: '700', fontSize: '10px', cursor: 'pointer', boxShadow: activeTab === t.id ? `4px 4px 8px #b8bec7, 0 0 12px ${t.color}44` : 'inset 3px 3px 6px #b8bec7, inset -3px -3px 6px #ffffff', transition: 'all 0.2s' }}>
             {t.label}
           </button>
         ))}
@@ -339,6 +423,8 @@ export default function Home() {
         </Section>
       )}
 
+      {activeTab === 'server' && <ServerTab />}
+
       {activeTab === 'dev' && (
         <div>
           <div style={{ ...neu, textAlign: 'center' }}>
@@ -354,9 +440,7 @@ export default function Home() {
 
           <div style={neu}>
             <div style={{ fontWeight: '700', fontSize: '14px', color: '#333', marginBottom: '12px' }}>📖 About Me</div>
-            <p style={{ fontSize: '13px', color: '#555', lineHeight: '1.6', margin: 0 }}>
-              Halo! Gua Egiii, developer yang suka bikin tools dan API yang berguna. Mulai ngoding dari iseng-iseng, sekarang udah jadi passion. Suka eksplorasi hal baru, dari web scraping, bot automation, sampe bikin API publik kayak Egii Apii ini. Project ini gua bangun sendiri sebagai bagian dari EgiiDev.
-            </p>
+            <p style={{ fontSize: '13px', color: '#555', lineHeight: '1.6', margin: 0 }}>Halo! Gua Egiii, developer yang suka bikin tools dan API yang berguna. Mulai ngoding dari iseng-iseng, sekarang udah jadi passion. Suka eksplorasi hal baru, dari web scraping, bot automation, sampe bikin API publik kayak Egii Apii ini. Project ini gua bangun sendiri sebagai bagian dari EgiiDev.</p>
           </div>
 
           <div style={neu}>
