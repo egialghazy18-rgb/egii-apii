@@ -281,7 +281,6 @@ export default function Home() {
   const [valoName, setValoName] = useState(''); const [valoTag, setValoTag] = useState(''); const [valoResult, setValoResult] = useState<any>(null); const [valoLoading, setValoLoading] = useState(false)
   const [mlId, setMlId] = useState(''); const [mlZone, setMlZone] = useState(''); const [mlResult, setMlResult] = useState<any>(null); const [mlLoading, setMlLoading] = useState(false)
   const [nglUrl, setNglUrl] = useState(''); const [nglPesan, setNglPesan] = useState(''); const [nglJumlah, setNglJumlah] = useState('5'); const [nglResult, setNglResult] = useState<any>(null); const [nglLoading, setNglLoading] = useState(false)
-  const [waChanUrl, setWaChanUrl] = useState(''); const [waChanResult, setWaChanResult] = useState<any>(null); const [waChanLoading, setWaChanLoading] = useState(false)
   const [waPhone, setWaPhone] = useState(''); const [waResult, setWaResult] = useState<any>(null); const [waLoading, setWaLoading] = useState(false)
   const [waChanUrl, setWaChanUrl] = useState(''); const [waChanResult, setWaChanResult] = useState<any>(null); const [waChanLoading, setWaChanLoading] = useState(false)
   const [deltaUrl, setDeltaUrl] = useState(''); const [deltaResult, setDeltaResult] = useState<any>(null); const [deltaLoading, setDeltaLoading] = useState(false)
