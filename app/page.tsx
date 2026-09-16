@@ -1,4 +1,3 @@
-cat > /mnt/user-data/outputs/page.tsx << 'ENDOFFILE'
 'use client'
 import { useState, useEffect } from 'react'
 
@@ -6,7 +5,7 @@ const neu = { background: '#e0e5ec', borderRadius: '20px', padding: '20px', boxS
 const neu2 = { background: '#e0e5ec', boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff', borderRadius: '12px', padding: '10px 14px', fontSize: '13px', color: '#888', marginBottom: '8px' } as React.CSSProperties
 const neuInput = { background: '#e0e5ec', boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff', borderRadius: '12px', padding: '14px', fontSize: '14px', color: '#444', outline: 'none', border: 'none', width: '100%' } as React.CSSProperties
 
-const STATUS_COLORS = {
+const STATUS_COLORS: any = {
   ok: { bg: 'linear-gradient(135deg, #00c853, #69f0ae)', text: '#fff', label: '● Online', dot: '#00e676' },
   slow: { bg: 'linear-gradient(135deg, #ff6f00, #ffd740)', text: '#fff', label: '● Lambat', dot: '#ffd740' },
   error: { bg: 'linear-gradient(135deg, #c62828, #ef5350)', text: '#fff', label: '● Error', dot: '#ef5350' },
@@ -35,23 +34,23 @@ function StatGrid({ items }: { items: { val: any, label: string }[] }) {
 }
 
 function Avatar({ src }: { src: string }) {
-  return <img src={src} alt="avatar" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', marginBottom: '10px', boxShadow: '4px 4px 8px #b8bec7' }} onError={(e: any) => e.target.style.display = 'none'} />
+  return <img src={src} alt="avatar" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', marginBottom: '10px', boxShadow: '4px 4px 8px #b8bec7', display: 'block', margin: '0 auto 10px' }} onError={(e: any) => e.target.style.display = 'none'} />
 }
 
-function WaCard({ data }: any) {
-  if (!data?.status) return null
-  const d = data.data
+function ErrorCard({ data }: any) {
+  if (!data || data.status !== false) return null
+  return <div style={{ ...neu2, marginTop: '12px', color: '#f44', textAlign: 'center' }}>❌ {data.message}</div>
+}
+
+function Section({ path, label, color, children }: any) {
   return (
-    <div style={{ ...neu2, marginTop: '12px' }}>
-      <div style={{ fontSize: '32px', textAlign: 'center', marginBottom: '8px' }}>{d.whatsapp ? '✅' : '❌'}</div>
-      <div style={{ textAlign: 'center', fontWeight: '700', fontSize: '15px', color: d.whatsapp ? '#25D366' : '#f44', marginBottom: '12px' }}>{d.status}</div>
-      <div style={{ fontSize: '13px', color: '#555', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <div>📱 <b>Nomor:</b> {d.phone_original}</div>
-        <div>🌐 <b>Internasional:</b> {d.phone_intl}</div>
-        <div>📡 <b>Operator:</b> {d.operator}</div>
-        <div>🗺 <b>Wilayah:</b> {d.region}</div>
-        {d.whatsapp && <div style={{ marginTop: '8px', textAlign: 'center' }}><a href={d.wa_link} target="_blank" style={{ color: '#25D366', fontWeight: '700', textDecoration: 'none' }}>💬 Chat via WhatsApp</a></div>}
+    <div style={neu}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+        <div style={{ background: '#e0e5ec', boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff', borderRadius: '8px', padding: '3px 10px', fontSize: '11px', fontWeight: '700', color }}>GET</div>
+        <code style={{ fontSize: '13px', color: '#444', fontWeight: '600' }}>{path}</code>
+        <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#999' }}>{label}</span>
       </div>
+      {children}
     </div>
   )
 }
@@ -61,12 +60,13 @@ function IgCard({ data }: any) {
   const d = data.data
   return (
     <div style={{ ...neu2, marginTop: '12px', textAlign: 'center' }}>
+      {d.profile_pic && <Avatar src={d.profile_pic} />}
       <div style={{ fontWeight: '700', fontSize: '15px', color: '#333' }}>{d.full_name} {d.is_verified && '✅'}</div>
       <div style={{ color: '#888', fontSize: '12px', marginBottom: '4px' }}>@{d.username}</div>
       {d.is_private && <div style={{ color: '#f44', fontSize: '11px' }}>🔒 Private</div>}
       {d.bio && <div style={{ fontSize: '12px', color: '#555', marginBottom: '8px' }}>{d.bio}</div>}
-      <StatGrid items={[{val: d.followers, label: 'Followers'},{val: d.following, label: 'Following'},{val: d.posts, label: 'Posts'}]} />
-      <a href={d.ig_url} target="_blank" style={{ color: '#E1306C', fontWeight: '700', textDecoration: 'none' }}>📸 Buka Instagram</a>
+      <StatGrid items={[{ val: Number(d.followers).toLocaleString(), label: 'Followers' }, { val: Number(d.following).toLocaleString(), label: 'Following' }, { val: Number(d.posts).toLocaleString(), label: 'Posts' }]} />
+      <a href={`https://instagram.com/${d.username}`} target="_blank" style={{ color: '#E1306C', fontWeight: '700', textDecoration: 'none' }}>📸 Buka Instagram</a>
     </div>
   )
 }
@@ -79,8 +79,8 @@ function TokCard({ data }: any) {
       {d.profile_pic && <Avatar src={d.profile_pic} />}
       <div style={{ fontWeight: '700', fontSize: '16px', color: '#333' }}>{d.nickname} {d.is_verified && '✅'}</div>
       <div style={{ color: '#888', fontSize: '12px', marginBottom: '4px' }}>@{d.username}</div>
-      {d.bio && <div style={{ fontSize: '12px', color: '#555', marginBottom: '10px', fontStyle: 'italic' }}>{d.bio}</div>}
-      <StatGrid items={[{val: Number(d.followers).toLocaleString(), label: 'Followers'},{val: Number(d.following).toLocaleString(), label: 'Following'},{val: Number(d.videos).toLocaleString(), label: 'Videos'},{val: Number(d.likes).toLocaleString(), label: 'Likes'}]} />
+      {d.bio && <div style={{ fontSize: '12px', color: '#555', marginBottom: '10px' }}>{d.bio}</div>}
+      <StatGrid items={[{ val: Number(d.followers).toLocaleString(), label: 'Followers' }, { val: Number(d.following).toLocaleString(), label: 'Following' }, { val: Number(d.videos).toLocaleString(), label: 'Videos' }, { val: Number(d.likes).toLocaleString(), label: 'Likes' }]} />
     </div>
   )
 }
@@ -93,11 +93,11 @@ function RobloxCard({ data }: any) {
       {d.profile_pic && <Avatar src={d.profile_pic} />}
       <div style={{ fontWeight: '700', fontSize: '15px', color: '#333' }}>{d.display_name} {d.is_verified && '✅'}</div>
       <div style={{ color: '#888', fontSize: '12px', marginBottom: '4px' }}>@{d.username}</div>
-      {d.is_banned && <div style={{ color: '#f44', fontSize: '11px', marginBottom: '4px' }}>🔨 Akun Dibanned</div>}
-      {d.bio && <div style={{ fontSize: '12px', color: '#555', margin: '8px 0', fontStyle: 'italic' }}>{d.bio}</div>}
-      <StatGrid items={[{val: Number(d.friends).toLocaleString(), label: 'Friends'},{val: Number(d.followers).toLocaleString(), label: 'Followers'},{val: Number(d.following).toLocaleString(), label: 'Following'}]} />
-      <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px' }}>📅 Bergabung pada {d.created}</div>
-      <a href={d.profile_url} target="_blank" style={{ color: '#e53935', fontWeight: '700', textDecoration: 'none' }}>🎮 Buka Profil Roblox</a>
+      {d.is_banned && <div style={{ color: '#f44', fontSize: '11px' }}>🔨 Dibanned</div>}
+      {d.bio && <div style={{ fontSize: '12px', color: '#555', margin: '8px 0' }}>{d.bio}</div>}
+      <StatGrid items={[{ val: Number(d.friends).toLocaleString(), label: 'Friends' }, { val: Number(d.followers).toLocaleString(), label: 'Followers' }, { val: Number(d.following).toLocaleString(), label: 'Following' }]} />
+      <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px' }}>📅 {d.created}</div>
+      <a href={d.profile_url} target="_blank" style={{ color: '#e53935', fontWeight: '700', textDecoration: 'none' }}>🎮 Buka Roblox</a>
     </div>
   )
 }
@@ -110,21 +110,20 @@ function GithubCard({ data }: any) {
       {d.avatar && <Avatar src={d.avatar} />}
       <div style={{ fontWeight: '700', fontSize: '15px', color: '#333' }}>{d.name || d.username}</div>
       <div style={{ color: '#888', fontSize: '12px', marginBottom: '4px' }}>@{d.username}</div>
-      {d.bio && <div style={{ fontSize: '12px', color: '#555', margin: '6px 0', fontStyle: 'italic' }}>{d.bio}</div>}
+      {d.bio && <div style={{ fontSize: '12px', color: '#555', margin: '6px 0' }}>{d.bio}</div>}
       {d.location && <div style={{ fontSize: '12px', color: '#888' }}>📍 {d.location}</div>}
-      <StatGrid items={[{val: Number(d.followers).toLocaleString(), label: 'Followers'},{val: Number(d.following).toLocaleString(), label: 'Following'},{val: Number(d.public_repos).toLocaleString(), label: 'Repos'},{val: Number(d.total_stars).toLocaleString(), label: 'Stars'}]} />
+      <StatGrid items={[{ val: Number(d.followers).toLocaleString(), label: 'Followers' }, { val: Number(d.following).toLocaleString(), label: 'Following' }, { val: Number(d.public_repos).toLocaleString(), label: 'Repos' }, { val: Number(d.total_stars).toLocaleString(), label: 'Stars' }]} />
       {d.top_repos?.length > 0 && (
         <div style={{ textAlign: 'left', marginTop: '8px' }}>
           <div style={{ fontSize: '11px', color: '#888', fontWeight: '700', marginBottom: '6px' }}>⭐ TOP REPOS</div>
           {d.top_repos.map((r: any) => (
-            <a key={r.name} href={r.url} target="_blank" style={{ display: 'block', textDecoration: 'none', background: '#e0e5ec', borderRadius: '10px', padding: '8px 10px', marginBottom: '6px', boxShadow: '3px 3px 6px #b8bec7, -2px -2px 4px #ffffff' }}>
+            <a key={r.name} href={r.url} target="_blank" style={{ display: 'block', textDecoration: 'none', background: '#e0e5ec', borderRadius: '10px', padding: '8px 10px', marginBottom: '6px', boxShadow: '3px 3px 6px #b8bec7' }}>
               <div style={{ fontWeight: '700', fontSize: '12px', color: '#333' }}>{r.name}</div>
               <div style={{ fontSize: '11px', color: '#888' }}>{r.language || 'Unknown'} • ⭐ {r.stars}</div>
             </a>
           ))}
         </div>
       )}
-      <div style={{ fontSize: '11px', color: '#888', margin: '8px 0' }}>📅 Bergabung pada {d.joined}</div>
       <a href={d.profile_url} target="_blank" style={{ color: '#333', fontWeight: '700', textDecoration: 'none' }}>🐙 Buka GitHub</a>
     </div>
   )
@@ -139,7 +138,7 @@ function TwitterCard({ data }: any) {
       <div style={{ fontWeight: '700', fontSize: '15px', color: '#333' }}>{d.name} {d.is_verified && '✅'}</div>
       <div style={{ color: '#888', fontSize: '12px', marginBottom: '4px' }}>@{d.username}</div>
       {d.bio && <div style={{ fontSize: '12px', color: '#555', margin: '6px 0' }}>{d.bio}</div>}
-      <StatGrid items={[{val: Number(d.followers).toLocaleString(), label: 'Followers'},{val: Number(d.following).toLocaleString(), label: 'Following'},{val: Number(d.tweets).toLocaleString(), label: 'Tweets'}]} />
+      <StatGrid items={[{ val: Number(d.followers).toLocaleString(), label: 'Followers' }, { val: Number(d.following).toLocaleString(), label: 'Following' }, { val: Number(d.tweets).toLocaleString(), label: 'Tweets' }]} />
       <a href={d.profile_url} target="_blank" style={{ color: '#1DA1F2', fontWeight: '700', textDecoration: 'none' }}>🐦 Buka Twitter</a>
     </div>
   )
@@ -150,12 +149,11 @@ function ValoCard({ data }: any) {
   const d = data.data
   return (
     <div style={{ ...neu2, marginTop: '12px', textAlign: 'center' }}>
-      {d.avatar && <Avatar src={d.avatar} />}
       <div style={{ fontWeight: '700', fontSize: '15px', color: '#333' }}>{d.name}<span style={{ color: '#ff4655' }}>#{d.tag}</span></div>
       <div style={{ color: '#888', fontSize: '12px', marginBottom: '8px' }}>Level {d.level} • {d.region}</div>
-      {d.rank_icon && <img src={d.rank_icon} alt="rank" style={{ width: '48px', height: '48px', margin: '4px auto' }} />}
+      {d.rank_icon && <img src={d.rank_icon} alt="rank" style={{ width: '48px', height: '48px', margin: '4px auto', display: 'block' }} />}
       <div style={{ fontWeight: '700', fontSize: '16px', color: '#ff4655', marginBottom: '4px' }}>{d.rank}</div>
-      <StatGrid items={[{val: d.elo, label: 'ELO'},{val: (d.last_match_change > 0 ? '+' : '') + d.last_match_change, label: 'Last Match'}]} />
+      <StatGrid items={[{ val: d.elo, label: 'ELO' }, { val: (d.last_match_change > 0 ? '+' : '') + d.last_match_change, label: 'Last Match' }]} />
       <a href={d.profile_url} target="_blank" style={{ color: '#ff4655', fontWeight: '700', textDecoration: 'none' }}>🎯 Lihat Stats</a>
     </div>
   )
@@ -167,31 +165,55 @@ function MLCard({ data }: any) {
   return (
     <div style={{ ...neu2, marginTop: '12px', textAlign: 'center' }}>
       <div style={{ fontSize: '32px', marginBottom: '8px' }}>🏆</div>
-      <div style={{ fontWeight: '700', fontSize: '16px', color: '#333', marginBottom: '4px' }}>{d.username}</div>
-      <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px' }}>{d.game}</div>
-      <StatGrid items={[{val: d.user_id, label: 'User ID'},{val: d.zone_id, label: 'Zone ID'}]} />
+      <div style={{ fontWeight: '700', fontSize: '16px', color: '#333' }}>{d.username}</div>
+      <div style={{ fontSize: '12px', color: '#888' }}>{d.game}</div>
+      <StatGrid items={[{ val: d.user_id, label: 'User ID' }, { val: d.zone_id, label: 'Zone ID' }]} />
     </div>
   )
 }
 
-function ErrorCard({ data }: any) {
-  if (!data || data.status !== false) return null
+function WaCard({ data }: any) {
+  if (!data?.status) return null
+  const d = data.data
   return (
-    <div style={{ ...neu2, marginTop: '12px', color: '#f44', textAlign: 'center' }}>
-      ❌ {data.message}
-    </div>
-  )
-}
-
-function Section({ path, label, color, children }: any) {
-  return (
-    <div style={neu}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-        <div style={{ background: '#e0e5ec', boxShadow: '3px 3px 6px #b8bec7, -3px -3px 6px #ffffff', borderRadius: '8px', padding: '3px 10px', fontSize: '11px', fontWeight: '700', color }}>GET</div>
-        <code style={{ fontSize: '13px', color: '#444', fontWeight: '600' }}>{path}</code>
-        <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#999' }}>{label}</span>
+    <div style={{ ...neu2, marginTop: '12px' }}>
+      <div style={{ fontSize: '32px', textAlign: 'center', marginBottom: '8px' }}>{d.whatsapp ? '✅' : '❌'}</div>
+      <div style={{ textAlign: 'center', fontWeight: '700', fontSize: '15px', color: d.whatsapp ? '#25D366' : '#f44', marginBottom: '12px' }}>{d.status}</div>
+      <div style={{ fontSize: '13px', color: '#555', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div>📱 <b>Nomor:</b> {d.phone_original}</div>
+        <div>🌐 <b>Internasional:</b> {d.phone_intl}</div>
+        {d.whatsapp && <div style={{ marginTop: '8px', textAlign: 'center' }}><a href={d.wa_link} target="_blank" style={{ color: '#25D366', fontWeight: '700', textDecoration: 'none' }}>💬 Chat via WhatsApp</a></div>}
       </div>
-      {children}
+    </div>
+  )
+}
+
+function WaChannelCard({ data }: any) {
+  if (!data?.status) return null
+  const d = data.data
+  return (
+    <div style={{ ...neu2, marginTop: '12px', textAlign: 'center' }}>
+      {d.image && <img src={d.image} alt="channel" style={{ width: 70, height: 70, borderRadius: '50%', display: 'block', margin: '0 auto 10px', objectFit: 'cover' }} onError={(e: any) => e.target.style.display = 'none'} />}
+      <div style={{ fontWeight: '700', fontSize: '15px', color: '#333' }}>{d.name}</div>
+      <div style={{ fontSize: '12px', color: '#888', margin: '4px 0 8px' }}>👥 {d.subscribers} Subscriber</div>
+      {d.description && <div style={{ fontSize: '12px', color: '#555' }}>{d.description}</div>}
+    </div>
+  )
+}
+
+function DeltaCard({ data }: any) {
+  if (!data?.status) return null
+  return (
+    <div style={{ ...neu2, marginTop: '12px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+        <div style={{ fontSize: '28px' }}>🔑</div>
+        <div style={{ fontWeight: '700', fontSize: '14px', color: '#7c3aed', marginBottom: '6px' }}>Key Berhasil Didapat!</div>
+      </div>
+      <div style={{ background: '#e0e5ec', borderRadius: '8px', padding: '10px 14px', boxShadow: 'inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <code style={{ flex: 1, fontSize: '12px', color: '#333', wordBreak: 'break-all' }}>{data.key}</code>
+        <button onClick={() => navigator.clipboard.writeText(data.key)} style={{ background: '#7c3aed', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>Copy</button>
+      </div>
+      {data.note && <div style={{ fontSize: '11px', color: '#ff9800', marginTop: '8px', textAlign: 'center' }}>⚠ {data.note}</div>}
     </div>
   )
 }
@@ -214,24 +236,19 @@ function ServerTab() {
 
   const s = data?.summary
   const overall = !s ? 'loading' : s.down > 3 || s.error > 3 ? 'down' : s.slow > 0 || s.error > 0 || s.down > 0 ? 'slow' : 'ok'
-  const overallColor = overall === 'ok' ? '#00c853' : overall === 'slow' ? '#ff6f00' : overall === 'down' ? '#c62828' : '#888'
-  const overallLabel = overall === 'ok' ? 'Semua Sistem Normal' : overall === 'slow' ? 'Beberapa Layanan Bermasalah' : overall === 'down' ? 'Sistem Bermasalah' : 'Mengecek...'
+  const overallColor = overall === 'ok' ? '#00c853' : overall === 'slow' ? '#ff6f00' : '#c62828'
+  const overallLabel = overall === 'ok' ? 'Semua Sistem Normal' : overall === 'slow' ? 'Beberapa Layanan Bermasalah' : 'Sistem Bermasalah'
 
   return (
     <div>
       <div style={{ ...neu, textAlign: 'center', background: 'linear-gradient(135deg, #1a1a2e, #16213e)', borderRadius: '20px' }}>
         <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px', letterSpacing: '2px', textTransform: 'uppercase' }}>System Status</div>
-        <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: overallColor, margin: '0 auto 8px', boxShadow: `0 0 12px ${overallColor}, 0 0 24px ${overallColor}` }} />
+        <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: overallColor, margin: '0 auto 8px', boxShadow: `0 0 12px ${overallColor}` }} />
         <div style={{ fontWeight: '700', fontSize: '16px', color: '#fff', marginBottom: '4px' }}>{overallLabel}</div>
         {lastCheck && <div style={{ fontSize: '11px', color: '#666' }}>Terakhir dicek: {lastCheck}</div>}
         {s && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px', marginTop: '16px' }}>
-            {[
-              { val: s.ok, label: 'Online', color: '#00c853' },
-              { val: s.slow, label: 'Lambat', color: '#ffd740' },
-              { val: s.error, label: 'Error', color: '#ef5350' },
-              { val: s.down, label: 'Down', color: '#78909c' },
-            ].map(({ val, label, color }) => (
+            {[{ val: s.ok, label: 'Online', color: '#00c853' }, { val: s.slow, label: 'Lambat', color: '#ffd740' }, { val: s.error, label: 'Error', color: '#ef5350' }, { val: s.down, label: 'Down', color: '#78909c' }].map(({ val, label, color }) => (
               <div key={label} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '8px 4px' }}>
                 <div style={{ fontWeight: '700', fontSize: '18px', color }}>{val}</div>
                 <div style={{ fontSize: '10px', color: '#666' }}>{label}</div>
@@ -243,9 +260,8 @@ function ServerTab() {
           {loading ? '⟳ Mengecek...' : '↻ Refresh'}
         </button>
       </div>
-
       {data?.endpoints?.map((ep: any) => {
-        const sc = STATUS_COLORS[ep.status as keyof typeof STATUS_COLORS]
+        const sc = STATUS_COLORS[ep.status]
         return (
           <div key={ep.name} style={{ background: '#e0e5ec', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px', boxShadow: '4px 4px 8px #b8bec7, -2px -2px 6px #ffffff', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: sc.dot, flexShrink: 0, boxShadow: `0 0 6px ${sc.dot}` }} />
@@ -260,12 +276,6 @@ function ServerTab() {
           </div>
         )
       })}
-
-      {loading && !data && (
-        <div style={{ textAlign: 'center', color: '#888', padding: '40px', fontSize: '13px' }}>
-          ⟳ Mengecek semua endpoint...
-        </div>
-      )}
     </div>
   )
 }
@@ -296,20 +306,12 @@ export default function Home() {
     setResult(await res.json()); setLoading(false)
   }
 
-  const getDeltaKey = async () => {
-    setDeltaLoading(true)
-    setDeltaResult(null)
-    const res = await fetch(`/api/deltakey?url=${encodeURIComponent(deltaUrl)}`)
-    setDeltaResult(await res.json())
-    setDeltaLoading(false)
-  }
-
   const tabs = [
     { id: 'stalk', label: '👤 Stalk', color: '#5c6bc0' },
     { id: 'spam', label: '💬 Spam', color: '#4CAF50' },
     { id: 'tools', label: '🔧 Tools', color: '#25D366' },
-    { id: 'server', label: '🖥 Server', color: '#0288d1' },
-    { id: 'dev', label: '👨💻 Dev', color: '#ff7043' },
+    { id: 'server', label: '🖥️ Server', color: '#0288d1' },
+    { id: 'dev', label: '👨‍💻 Dev', color: '#ff7043' },
   ]
 
   return (
@@ -324,7 +326,7 @@ export default function Home() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '6px', marginBottom: '20px' }}>
         {tabs.map(t => (
-          <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ background: activeTab === t.id ? t.color : '#e0e5ec', color: activeTab === t.id ? '#fff' : '#888', border: 'none', borderRadius: '12px', padding: '10px 2px', fontWeight: '700', fontSize: '10px', cursor: 'pointer', boxShadow: activeTab === t.id ? `4px 4px 8px #b8bec7, 0 0 12px ${t.color}44` : 'inset 3px 3px 6px #b8bec7, inset -3px -3px 6px #ffffff', transition: 'all 0.2s' }}>
+          <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ background: activeTab === t.id ? t.color : '#e0e5ec', color: activeTab === t.id ? '#fff' : '#888', border: 'none', borderRadius: '12px', padding: '10px 2px', fontWeight: '700', fontSize: '10px', cursor: 'pointer', boxShadow: activeTab === t.id ? '4px 4px 8px #b8bec7' : 'inset 3px 3px 6px #b8bec7, inset -3px -3px 6px #ffffff', transition: 'all 0.2s' }}>
             {t.label}
           </button>
         ))}
@@ -404,7 +406,7 @@ export default function Home() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
               <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>NGL LINK</label>
-              <input style={neuInput} placeholder="https://ngl.link/eguu1" value={nglUrl} onChange={e => setNglUrl(e.target.value)} />
+              <input style={neuInput} placeholder="https://ngl.link/egiuu1" value={nglUrl} onChange={e => setNglUrl(e.target.value)} />
               {nglUrl && <p style={{ fontSize: '11px', color: '#888', marginTop: '6px' }}>Username: <span style={{ color: '#4CAF50', fontWeight: '600' }}>{extractUsername(nglUrl)}</span></p>}
             </div>
             <div>
@@ -424,52 +426,27 @@ export default function Home() {
       {activeTab === 'tools' && (
         <>
           <Section path="/api/wacheck" label="WA Check" color="#25D366">
-            <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Cek nomor HP aktif di WhatsApp + info operator</p>
+            <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Cek nomor HP aktif di WhatsApp</p>
             <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>NOMOR HP</label>
             <input style={neuInput} placeholder="08xxxxxxxxxx" value={waPhone} onChange={e => setWaPhone(e.target.value)} />
             <Btn onClick={() => call(`/api/wacheck?phone=${waPhone}`, setWaResult, setWaLoading)} disabled={waLoading || !waPhone} loading={waLoading} label="✅ Check WhatsApp" color="#25D366" />
             <WaCard data={waResult} /><ErrorCard data={waResult} />
           </Section>
 
+          <Section path="/api/wachannel" label="WA Channel" color="#25D366">
+            <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Cek info channel WhatsApp dari link</p>
+            <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>LINK CHANNEL WA</label>
+            <input style={neuInput} placeholder="https://whatsapp.com/channel/xxx" value={waChanUrl} onChange={e => setWaChanUrl(e.target.value)} />
+            <Btn onClick={() => call(`/api/wachannel?url=${encodeURIComponent(waChanUrl)}`, setWaChanResult, setWaChanLoading)} disabled={waChanLoading || !waChanUrl} loading={waChanLoading} label="🔍 Cek Channel WA" color="#25D366" />
+            <WaChannelCard data={waChanResult} /><ErrorCard data={waChanResult} />
+          </Section>
+
           <Section path="/api/deltakey" label="Delta Key" color="#7c3aed">
-            <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Paste link dari Delta key system, bypass otomatis</p>
+            <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Bypass link Delta key system otomatis</p>
             <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>DELTA LINK</label>
             <input style={neuInput} placeholder="https://delta.link/..." value={deltaUrl} onChange={e => setDeltaUrl(e.target.value)} />
-            <Btn onClick={getDeltaKey} disabled={deltaLoading || !deltaUrl} loading={deltaLoading} label="⚡ Get Delta Key" color="#7c3aed" />
-            {deltaResult && deltaResult.status && (
-              <div style={{ ...neu2, marginTop: '12px' }}>
-                <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                  <div style={{ fontSize: '28px' }}>🔑</div>
-                  <div style={{ fontWeight: '700', fontSize: '14px', color: '#7c3aed', marginBottom: '6px' }}>Key Berhasil Didapat</div>
-                </div>
-                <div style={{ background: '#e0e5ec', borderRadius: '10px', padding: '10px 14px', boxShadow: 'inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <code style={{ flex: 1, fontSize: '12px', color: '#333', wordBreak: 'break-all' }}>{deltaResult.data?.key || deltaResult.key}</code>
-                  <button onClick={() => navigator.clipboard.writeText(deltaResult.data?.key || deltaResult.key)} style={{ background: '#7c3aed', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>Copy</button>
-                </div>
-                {deltaResult.note && (
-                  <div style={{ fontSize: '11px', color: '#ff9800', marginTop: '8px', textAlign: 'center' }}>⚠ {deltaResult.note}</div>
-                )}
-                {deltaResult.steps?.length > 1 && (
-                  <div style={{ marginTop: '10px' }}>
-                    <div style={{ fontSize: '11px', color: '#888', fontWeight: '700', marginBottom: '6px' }}>📋 STEPS ({deltaResult.steps.length})</div>
-                    {deltaResult.steps.map((s: string, i: number) => (
-                      <div key={i} style={{ fontSize: '10px', color: '#888', background: '#e0e5ec', borderRadius: '8px', padding: '6px 10px', marginBottom: '4px', boxShadow: 'inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff', wordBreak: 'break-all' }}>
-                        {i + 1}. {s}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-            <ErrorCard data={deltaResult} />
-      <Section path="/api/wachannel" label="WA Channel" color="#25D366">
-        <p style={{ fontSize: "12px", color: "#888", marginBottom: "16px" }}>Cek info channel WhatsApp dari link</p>
-        <label style={{ fontSize: "11px", color: "#888", display: "block", marginBottom: "6px", fontWeight: "600" }}>LINK CHANNEL WA</label>
-        <input style={neuInput} placeholder="https://whatsapp.com/channel/xxx" value={waChanUrl} onChange={e => setWaChanUrl(e.target.value)} />
-        <Btn onClick={() => call(`/api/wachannel?url=${encodeURIComponent(waChanUrl)}`, setWaChanResult, setWaChanLoading)} disabled={waChanLoading || !waChanUrl} loading={waChanLoading} label="🔍 Cek Channel WA" color="#25D366" />
-        {waChanResult?.status && (<div style={{ ...neu2, marginTop: "12px", textAlign: "center" }}>{waChanResult.data?.image && <img src={waChanResult.data.image} alt="ch" style={{ width: 70, height: 70, borderRadius: "50%", margin: "0 auto 8px", display: "block" }} />}<div style={{ fontWeight: "700", fontSize: "15px", color: "#333" }}>{waChanResult.data?.name}</div><div style={{ fontSize: "12px", color: "#888" }}>👥 {waChanResult.data?.subscribers}</div>{waChanResult.data?.description && <div style={{ fontSize: "12px", color: "#555", marginTop: "6px" }}>{waChanResult.data.description}</div>}</div>)}
-        <ErrorCard data={waChanResult} />
-      </Section>
+            <Btn onClick={() => call(`/api/deltakey?url=${encodeURIComponent(deltaUrl)}`, setDeltaResult, setDeltaLoading)} disabled={deltaLoading || !deltaUrl} loading={deltaLoading} label="⚡ Get Delta Key" color="#7c3aed" />
+            <DeltaCard data={deltaResult} /><ErrorCard data={deltaResult} />
           </Section>
         </>
       )}
@@ -479,7 +456,7 @@ export default function Home() {
       {activeTab === 'dev' && (
         <div>
           <div style={{ ...neu, textAlign: 'center' }}>
-            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #ff7043, #5c6bc0)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', boxShadow: '4px 4px 8px #b8bec7, -2px -2px 6px #ffffff' }}>👨💻</div>
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #ff7043, #5c6bc0)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', boxShadow: '4px 4px 8px #b8bec7' }}>👨‍💻</div>
             <div style={{ fontWeight: '700', fontSize: '20px', color: '#333' }}>Egiii</div>
             <div style={{ fontSize: '13px', color: '#888', marginBottom: '12px' }}>Full-Stack Developer & API Builder</div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -488,32 +465,9 @@ export default function Home() {
               ))}
             </div>
           </div>
-
           <div style={neu}>
             <div style={{ fontWeight: '700', fontSize: '14px', color: '#333', marginBottom: '12px' }}>📖 About Me</div>
-            <p style={{ fontSize: '13px', color: '#555', lineHeight: '1.6', margin: 0 }}>Halo! Gua Egiii, developer yang suka bikin tools dan API yang berguna. Mulai ngoding dari iseng-iseng, sekarang udah jadi passion. Suka eksplorasi hal baru, dari web scraping, bot automation, sampe bikin API publik kayak Egii Apii ini. Project ini gua bangun sendiri sebagai bagian dari EgiiDev.</p>
-          </div>
-
-          <div style={neu}>
-            <div style={{ fontWeight: '700', fontSize: '14px', color: '#333', marginBottom: '12px' }}>📡 API Endpoints</div>
-            {[
-              { path: '/api/stalkg', desc: 'Stalk Instagram', color: '#E1306C' },
-              { path: '/api/stalktok', desc: 'Stalk TikTok', color: '#333' },
-              { path: '/api/stalkroblox', desc: 'Stalk Roblox', color: '#e53935' },
-              { path: '/api/stalkgithub', desc: 'Stalk GitHub', color: '#333' },
-              { path: '/api/stalktwitter', desc: 'Stalk Twitter', color: '#1DA1F2' },
-              { path: '/api/stalkvalo', desc: 'Stalk Valorant', color: '#ff4655' },
-              { path: '/api/stalkml', desc: 'Stalk Mobile Legends', color: '#e8b800' },
-              { path: '/api/wacheck', desc: 'Cek WhatsApp', color: '#25D366' },
-              { path: '/api/nglspam', desc: 'NGL Spam', color: '#4CAF50' },
-              { path: '/api/deltakey', desc: 'Delta Key Bypass', color: '#7c3aed' },
-            ].map(e => (
-              <div key={e.path} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', background: '#e0e5ec', borderRadius: '10px', padding: '10px', boxShadow: '3px 3px 6px #b8bec7, -2px -2px 4px #ffffff' }}>
-                <div style={{ background: e.color, borderRadius: '6px', padding: '2px 8px', fontSize: '10px', fontWeight: '700', color: '#fff' }}>GET</div>
-                <code style={{ fontSize: '12px', color: '#444' }}>{e.path}</code>
-                <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#888' }}>{e.desc}</span>
-              </div>
-            ))}
+            <p style={{ fontSize: '13px', color: '#555', lineHeight: '1.6', margin: 0 }}>Halo! Gua Egiii, developer yang suka bikin tools dan API. Project ini gua bangun sendiri sebagai bagian dari EgiiDev.</p>
           </div>
         </div>
       )}
@@ -522,5 +476,3 @@ export default function Home() {
     </main>
   )
 }
-ENDOFFILE
-// WaChannel sudah ditambahkan di route
