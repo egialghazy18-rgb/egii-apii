@@ -281,7 +281,9 @@ export default function Home() {
   const [valoName, setValoName] = useState(''); const [valoTag, setValoTag] = useState(''); const [valoResult, setValoResult] = useState<any>(null); const [valoLoading, setValoLoading] = useState(false)
   const [mlId, setMlId] = useState(''); const [mlZone, setMlZone] = useState(''); const [mlResult, setMlResult] = useState<any>(null); const [mlLoading, setMlLoading] = useState(false)
   const [nglUrl, setNglUrl] = useState(''); const [nglPesan, setNglPesan] = useState(''); const [nglJumlah, setNglJumlah] = useState('5'); const [nglResult, setNglResult] = useState<any>(null); const [nglLoading, setNglLoading] = useState(false)
+  const [waChanUrl, setWaChanUrl] = useState(''); const [waChanResult, setWaChanResult] = useState<any>(null); const [waChanLoading, setWaChanLoading] = useState(false)
   const [waPhone, setWaPhone] = useState(''); const [waResult, setWaResult] = useState<any>(null); const [waLoading, setWaLoading] = useState(false)
+  const [waChanUrl, setWaChanUrl] = useState(''); const [waChanResult, setWaChanResult] = useState<any>(null); const [waChanLoading, setWaChanLoading] = useState(false)
   const [deltaUrl, setDeltaUrl] = useState(''); const [deltaResult, setDeltaResult] = useState<any>(null); const [deltaLoading, setDeltaLoading] = useState(false)
 
   const extractUsername = (url: string) => {
@@ -461,6 +463,14 @@ export default function Home() {
               </div>
             )}
             <ErrorCard data={deltaResult} />
+      <Section path="/api/wachannel" label="WA Channel" color="#25D366">
+        <p style={{ fontSize: "12px", color: "#888", marginBottom: "16px" }}>Cek info channel WhatsApp dari link</p>
+        <label style={{ fontSize: "11px", color: "#888", display: "block", marginBottom: "6px", fontWeight: "600" }}>LINK CHANNEL WA</label>
+        <input style={neuInput} placeholder="https://whatsapp.com/channel/xxx" value={waChanUrl} onChange={e => setWaChanUrl(e.target.value)} />
+        <Btn onClick={() => call(`/api/wachannel?url=${encodeURIComponent(waChanUrl)}`, setWaChanResult, setWaChanLoading)} disabled={waChanLoading || !waChanUrl} loading={waChanLoading} label="🔍 Cek Channel WA" color="#25D366" />
+        {waChanResult?.status && (<div style={{ ...neu2, marginTop: "12px", textAlign: "center" }}>{waChanResult.data?.image && <img src={waChanResult.data.image} alt="ch" style={{ width: 70, height: 70, borderRadius: "50%", margin: "0 auto 8px", display: "block" }} />}<div style={{ fontWeight: "700", fontSize: "15px", color: "#333" }}>{waChanResult.data?.name}</div><div style={{ fontSize: "12px", color: "#888" }}>👥 {waChanResult.data?.subscribers}</div>{waChanResult.data?.description && <div style={{ fontSize: "12px", color: "#555", marginTop: "6px" }}>{waChanResult.data.description}</div>}</div>)}
+        <ErrorCard data={waChanResult} />
+      </Section>
           </Section>
         </>
       )}
@@ -514,3 +524,4 @@ export default function Home() {
   )
 }
 ENDOFFILE
+// WaChannel sudah ditambahkan di route
