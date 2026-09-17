@@ -290,6 +290,9 @@ export default function Home() {
   const [twitterUser, setTwitterUser] = useState(''); const [twitterResult, setTwitterResult] = useState<any>(null); const [twitterLoading, setTwitterLoading] = useState(false)
   const [valoName, setValoName] = useState(''); const [valoTag, setValoTag] = useState(''); const [valoResult, setValoResult] = useState<any>(null); const [valoLoading, setValoLoading] = useState(false)
   const [mlId, setMlId] = useState(''); const [mlZone, setMlZone] = useState(''); const [mlResult, setMlResult] = useState<any>(null); const [mlLoading, setMlLoading] = useState(false)
+  const [telloUser, setTelloUser] = useState(''); const [telloPesan, setTelloPesan] = useState(''); const [telloJumlah, setTelloJumlah] = useState('5'); const [telloResult, setTelloResult] = useState<any>(null); const [telloLoading, setTelloLoading] = useState(false)
+  const [telloUser, setTelloUser] = useState(''); const [telloPesan, setTelloPesan] = useState(''); const [telloJumlah, setTelloJumlah] = useState('5'); const [telloResult, setTelloResult] = useState<any>(null); const [telloLoading, setTelloLoading] = useState(false)
+  const [telloUser, setTelloUser] = useState(''); const [telloPesan, setTelloPesan] = useState(''); const [telloJumlah, setTelloJumlah] = useState('5'); const [telloResult, setTelloResult] = useState<any>(null); const [telloLoading, setTelloLoading] = useState(false)
   const [nglUrl, setNglUrl] = useState(''); const [nglPesan, setNglPesan] = useState(''); const [nglJumlah, setNglJumlah] = useState('5'); const [nglResult, setNglResult] = useState<any>(null); const [nglLoading, setNglLoading] = useState(false)
   const [waPhone, setWaPhone] = useState(''); const [waResult, setWaResult] = useState<any>(null); const [waLoading, setWaLoading] = useState(false)
   const [waChanUrl, setWaChanUrl] = useState(''); const [waChanResult, setWaChanResult] = useState<any>(null); const [waChanLoading, setWaChanLoading] = useState(false)
@@ -340,6 +343,25 @@ export default function Home() {
             <Btn onClick={() => call(`/api/stalkg?username=${igUser}`, setIgResult, setIgLoading)} disabled={igLoading || !igUser} loading={igLoading} label="🔍 Stalk Instagram" color="#E1306C" />
             <IgCard data={igResult} /><ErrorCard data={igResult} />
           </Section>
+
+        <Section path="/api/tellospam" label="Tellonym Spam" color="#4CAF50">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div>
+              <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>USERNAME TELLONYM</label>
+              <input style={neuInput} placeholder="username" value={telloUser} onChange={e => setTelloUser(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>PESAN</label>
+              <input style={neuInput} placeholder="hai 👋" value={telloPesan} onChange={e => setTelloPesan(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>JUMLAH (MAX 50)</label>
+              <input style={neuInput} type="number" placeholder="5" value={telloJumlah} onChange={e => setTelloJumlah(e.target.value)} />
+            </div>
+            <Btn onClick={() => call(`/api/tellospam?username=${telloUser}&pesan=${encodeURIComponent(telloPesan)}&jumlah=${telloJumlah}`, setTelloResult, setTelloLoading)} disabled={telloLoading || !telloUser || !telloPesan} loading={telloLoading} label="📨 Send Tellonym Spam" color="#4CAF50" />
+            {telloResult && <div style={neu2}><pre style={{ fontSize: '12px', color: '#4CAF50', margin: 0, overflow: 'auto' }}>{JSON.stringify(telloResult, null, 2)}</pre></div>}
+          </div>
+        </Section>
 
           <Section path="/api/stalktok" label="TikTok" color="#333">
             <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>USERNAME TIKTOK</label>
