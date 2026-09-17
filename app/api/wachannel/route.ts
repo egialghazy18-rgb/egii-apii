@@ -12,35 +12,41 @@ export async function GET(req: NextRequest) {
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Mobile Safari/537.36',
-        'Accept': 'text/html'
+        'Accept': 'text/html,application/xhtml+xml',
+        'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8'
       }
     })
 
     const html = await res.text()
 
-    // Ambil nama channel
-    const nameMatch = html.match(/<meta property="og:title" content="([^"]+)"/)
-    const descMatch = html.match(/<meta property="og:description" content="([^"]+)"/)
-    const imgMatch = html.match(/<meta property="og:image" content="([^"]+)"/)
-    const subsMatch = html.match(/(\d+(?:\.\d+)?[KkMm]?\+?)\s*(?:subscriber|pengikut|follower)/i)
+    const name = html.match(/<meta property="og:title" content="([^"]+)"/)?.[1] ||
+                 html.match(/<title>([^<]+)<\/title>/)?.[1] || null
 
-    const name = nameMatch?.[1] || 'Tidak ditemukan'
-    const desc = descMatch?.[1] || ''
-    const image = imgMatch?.[1] || ''
-    const subscribers = subsMatch?.[1] || 'Tidak diketahui'
+    const desc = html.match(/<meta property="og:description" content="([^"]+)"/)?.[1] ||
+                 html.match(/<meta name="description" content="([^"]+)"/)?.[1] || null
 
-    if (!nameMatch) {
+    const image = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1] || null
+
+    const subsMatch = html.match(/(\d[\d,.]+[KkMm]?)\s*(?:subscriber|pengikut|follower|anggota|member)/i)
+    const subscribers = subsMatch?.[1] || null
+
+    const isValid = !!name && (url.includes('whatsapp.com/channel') || url.includes('chat.whatsapp.com'))
+
+    if (!name) {
       return NextResponse.json({ status: false, message: 'Channel tidak ditemukan atau link tidak valid' }, { status: 404 })
     }
 
     return NextResponse.json({
       status: true,
       data: {
-        name,
+        valid: isValid,
+        name: name.replace(' | WhatsApp Channel', '').replace(' - WhatsApp', '').trim(),
         description: desc,
         image,
-        subscribers,
+        subscribers: subscribers || 'Tidak diketahui',
         url,
+        type: url.includes('whatsapp.com/channel') ? 'Channel' : 'Group',
+        platform: 'WhatsApp'
       },
       author: 'Egii Apii'
     })
