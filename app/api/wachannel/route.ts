@@ -10,20 +10,37 @@ export async function GET(req: NextRequest) {
 
   try {
     const channelId = url.split('/channel/')?.[1]?.split('?')?.[0]
-
     if (!channelId) {
       return NextResponse.json({ status: false, message: 'Link channel tidak valid' }, { status: 400 })
     }
 
-    return NextResponse.json({
-      status: true,
-      channel_id: channelId,
-      url: `https://whatsapp.com/channel/${channelId}`,
-      invite_link: `https://wa.me/channel/${channelId}`,
-      type: 'WhatsApp Channel',
-      note: 'Info lengkap tidak tersedia karena WhatsApp memblokir akses server',
-      author: 'Egii Apii'
+    // Coba via api nexadev
+    const res = await fetch(`https://api.nexadev.my.id/tools/wainfo?url=${encodeURIComponent(url)}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0' }
     })
+
+    if (res.ok) {
+      const data = await res.json()
+      if (data?.status) {
+        return NextResponse.json({
+          status: true,
+          name: data.name || data.title || 'Tidak diketahui',
+          subscribers: data.subscribers || data.members || 'Tidak diketahui',
+          description: data.description || null,
+          image: data.image || null,
+          channel_id: channelId,
+          url: `https://whatsapp.com/channel/${channelId}`,
+          type: 'WhatsApp Channel',
+          author: 'Egii Apii'
+        })
+      }
+    }
+
+    // Fallback
+    return NextResponse.json({
+      status: false,
+      message: 'Tidak bisa mengambil info channel, WhatsApp memblokir akses'
+    }, { status: 503 })
 
   } catch (err: any) {
     return NextResponse.json({ status: false, message: err.message }, { status: 500 })
