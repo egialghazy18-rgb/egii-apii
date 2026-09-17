@@ -359,7 +359,6 @@ export default function Home() {
             </div>
             {telloResult && <div style={neu2}><pre style={{ fontSize: '12px', color: '#4CAF50', margin: 0, overflow: 'auto' }}>{JSON.stringify(telloResult, null, 2)}</pre></div>}
           </div>
-        </Section>
 
           <Section path="/api/stalktok" label="TikTok" color="#333">
             <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>USERNAME TIKTOK</label>
