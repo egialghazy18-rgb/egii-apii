@@ -344,7 +344,6 @@ export default function Home() {
             <IgCard data={igResult} /><ErrorCard data={igResult} />
           </Section>
 
-        <Section path="/api/tellospam" label="Tellonym Spam" color="#4CAF50">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
               <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>USERNAME TELLONYM</label>
@@ -358,7 +357,6 @@ export default function Home() {
               <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>JUMLAH (MAX 50)</label>
               <input style={neuInput} type="number" placeholder="5" value={telloJumlah} onChange={e => setTelloJumlah(e.target.value)} />
             </div>
-            <Btn onClick={() => call(`/api/tellospam?username=${telloUser}&pesan=${encodeURIComponent(telloPesan)}&jumlah=${telloJumlah}`, setTelloResult, setTelloLoading)} disabled={telloLoading || !telloUser || !telloPesan} loading={telloLoading} label="📨 Send Tellonym Spam" color="#4CAF50" />
             {telloResult && <div style={neu2}><pre style={{ fontSize: '12px', color: '#4CAF50', margin: 0, overflow: 'auto' }}>{JSON.stringify(telloResult, null, 2)}</pre></div>}
           </div>
         </Section>
@@ -441,6 +439,22 @@ export default function Home() {
             </div>
             <Btn onClick={() => call(`/api/nglspam?username=${extractUsername(nglUrl)}&pesan=${encodeURIComponent(nglPesan)}&jumlah=${nglJumlah}`, setNglResult, setNglLoading)} disabled={nglLoading || !nglUrl || !nglPesan} loading={nglLoading} label="📨 Send NGL Spam" color="#4CAF50" />
             {nglResult && <div style={neu2}><pre style={{ fontSize: '12px', color: '#4CAF50', margin: 0, overflow: 'auto' }}>{JSON.stringify(nglResult, null, 2)}</pre></div>}
+          </div>
+        </Section>
+        <Section path="/api/tellospam" label="Tellonym Spam" color="#4CAF50">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div>
+              <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>USERNAME TELLONYM</label>
+              <input style={neuInput} placeholder="username" value={telloUser} onChange={e => setTelloUser(e.target.value)} />
+            <div>
+              <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>PESAN</label>
+              <input style={neuInput} placeholder="hai 👋" value={telloPesan} onChange={e => setTelloPesan(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>JUMLAH (MAX 50)</label>
+              <input style={neuInput} type="number" placeholder="5" value={telloJumlah} onChange={e => setTelloJumlah(e.target.value)} />
+            </div>
+            {telloResult && <div style={neu2}><pre style={{ fontSize: '12px', color: '#4CAF50', margin: 0, overflow: 'auto' }}>{JSON.stringify(telloResult, null, 2)}</pre></div>}
           </div>
         </Section>
       )}
