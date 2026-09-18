@@ -19,8 +19,13 @@ async function kirimSatu(username: string, pesan: string): Promise<boolean> {
         username
       })
     })
+    const body = await res.json()
+    console.log('Status:', res.status, 'Body:', JSON.stringify(body))
     return res.ok
-  } catch { return false }
+  } catch (e) {
+    console.log('Error:', e)
+    return false
+  }
 }
 
 export async function GET(req: NextRequest) {
