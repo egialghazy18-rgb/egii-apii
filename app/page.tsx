@@ -438,7 +438,7 @@ export default function Home() {
                 <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>JUMLAH (MAX 50)</label>
                 <input style={neuInput} type="number" placeholder="5" value={telloJumlah} onChange={e => setTelloJumlah(e.target.value)} />
               </div>
-              <Btn onClick={() => call(`/api/tellospam?username=${telloUser.replace(/.*tellonym.me//, "").replace(//.*/, "")}&pesan=${encodeURIComponent(telloPesan)}&jumlah=${telloJumlah}`, setTelloResult, setTelloLoading)} disabled={telloLoading || !telloUser || !telloPesan} loading={telloLoading} label="📨 Send Tellonym Spam" color="#4CAF50" />
+              <Btn onClick={() => call(`/api/tellospam?username=${telloUser.split("tellonym.me/").pop().split("/")[0]}&pesan=${encodeURIComponent(telloPesan)}&jumlah=${telloJumlah}`, setTelloResult, setTelloLoading)} disabled={telloLoading || !telloUser || !telloPesan} loading={telloLoading} label="📨 Send Tellonym Spam" color="#4CAF50" />
               {telloResult && <div style={neu2}><pre style={{ fontSize: '12px', color: '#4CAF50', margin: 0, overflow: 'auto' }}>{JSON.stringify(telloResult, null, 2)}</pre></div>}
             </div>
           </Section>
