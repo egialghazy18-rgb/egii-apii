@@ -96,7 +96,7 @@ function RobloxCard({ data }: any) {
       {d.is_banned && <div style={{ color: '#f44', fontSize: '11px' }}>🔨 Dibanned</div>}
       {d.bio && <div style={{ fontSize: '12px', color: '#555', margin: '8px 0' }}>{d.bio}</div>}
       <StatGrid items={[{ val: Number(d.friends).toLocaleString(), label: 'Friends' }, { val: Number(d.followers).toLocaleString(), label: 'Followers' }, { val: Number(d.following).toLocaleString(), label: 'Following' }]} />
-      <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px' }}>📅 {d.created}</div>
+      <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px' }}> 📅 {d.created}</div>
       <a href={d.profile_url} target="_blank" style={{ color: '#e53935', fontWeight: '700', textDecoration: 'none' }}>🎮 Buka Roblox</a>
     </div>
   )
@@ -195,7 +195,7 @@ function WaChannelCard({ data }: any) {
     <div style={{ ...neu2, marginTop: '12px', textAlign: 'center' }}>
       {d.image && <img src={d.image} alt="channel" style={{ width: 70, height: 70, borderRadius: '50%', display: 'block', margin: '0 auto 10px', objectFit: 'cover' }} onError={(e: any) => e.target.style.display = 'none'} />}
       <div style={{ fontWeight: '700', fontSize: '15px', color: '#333' }}>{d.name}</div>
-      <div style={{ fontSize: '12px', color: '#888', margin: '4px 0 8px' }}>👥 {d.subscribers} Subscriber</div>
+      <div style={{ fontSize: '12px', color: '#888', margin: '4px 0 8px' }}> 👥 {d.subscribers} Subscriber</div>
       {d.description && <div style={{ fontSize: '12px', color: '#555' }}>{d.description}</div>}
     </div>
   )
@@ -214,6 +214,25 @@ function DeltaCard({ data }: any) {
         <button onClick={() => navigator.clipboard.writeText(data.key)} style={{ background: '#7c3aed', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>Copy</button>
       </div>
       {data.note && <div style={{ fontSize: '11px', color: '#ff9800', marginTop: '8px', textAlign: 'center' }}>⚠ {data.note}</div>}
+    </div>
+  )
+}
+
+function SafelinkuCard({ data }: any) {
+  if (!data?.status) return null
+  return (
+    <div style={{ ...neu2, marginTop: '12px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+        <div style={{ fontSize: '28px' }}>🔗</div>
+        <div style={{ fontWeight: '700', fontSize: '14px', color: '#0288d1', marginBottom: '6px' }}>Link Berhasil Dibypass!</div>
+      </div>
+      <div style={{ background: '#e0e5ec', borderRadius: '8px', padding: '10px 14px', boxShadow: 'inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <code style={{ flex: 1, fontSize: '12px', color: '#333', wordBreak: 'break-all' }}>{data.result}</code>
+        <button onClick={() => navigator.clipboard.writeText(data.result)} style={{ background: '#0288d1', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>Copy</button>
+      </div>
+      <div style={{ marginTop: '10px', textAlign: 'center' }}>
+        <a href={data.result} target="_blank" style={{ color: '#0288d1', fontWeight: '700', textDecoration: 'none', fontSize: '13px' }}>🌐 Buka Link</a>
+      </div>
     </div>
   )
 }
@@ -295,6 +314,7 @@ export default function Home() {
   const [waPhone, setWaPhone] = useState(''); const [waResult, setWaResult] = useState<any>(null); const [waLoading, setWaLoading] = useState(false)
   const [waChanUrl, setWaChanUrl] = useState(''); const [waChanResult, setWaChanResult] = useState<any>(null); const [waChanLoading, setWaChanLoading] = useState(false)
   const [deltaUrl, setDeltaUrl] = useState(''); const [deltaResult, setDeltaResult] = useState<any>(null); const [deltaLoading, setDeltaLoading] = useState(false)
+  const [safelinkUrl, setSafelinkUrl] = useState(''); const [safelinkResult, setSafelinkResult] = useState<any>(null); const [safelinkLoading, setSafelinkLoading] = useState(false)
 
   const extractUsername = (url: string) => {
     try { return new URL(url).pathname.replace('/', '').split('?')[0] }
@@ -469,6 +489,14 @@ export default function Home() {
             <input style={neuInput} placeholder="https://delta.link/..." value={deltaUrl} onChange={e => setDeltaUrl(e.target.value)} />
             <Btn onClick={() => call(`/api/deltakey?url=${encodeURIComponent(deltaUrl)}`, setDeltaResult, setDeltaLoading)} disabled={deltaLoading || !deltaUrl} loading={deltaLoading} label="⚡ Get Delta Key" color="#7c3aed" />
             <DeltaCard data={deltaResult} /><ErrorCard data={deltaResult} />
+          </Section>
+
+          <Section path="/api/safelinku" label="Safelinku Bypass" color="#0288d1">
+            <p style={{ fontSize: '12px', color: '#888', marginBottom: '16px' }}>Bypass link sfl.gl dan dapatkan link aslinya</p>
+            <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '6px', fontWeight: '600' }}>LINK SFL.GL</label>
+            <input style={neuInput} placeholder="https://sfl.gl/xxxxxx" value={safelinkUrl} onChange={e => setSafelinkUrl(e.target.value)} />
+            <Btn onClick={() => call(`/api/safelinku?url=${encodeURIComponent(safelinkUrl)}`, setSafelinkResult, setSafelinkLoading)} disabled={safelinkLoading || !safelinkUrl} loading={safelinkLoading} label="🔗 Bypass Safelinku" color="#0288d1" />
+            <SafelinkuCard data={safelinkResult} /><ErrorCard data={safelinkResult} />
           </Section>
         </>
       )}
