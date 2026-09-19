@@ -11,43 +11,47 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Step 1: Fetch halaman sfl.gl
     const r1 = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36' },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      },
       redirect: 'follow'
     })
-    const html = await r1.text()
 
-    // Step 2: Extract ray_id dan alias
+    const html = await r1.text()
+    const snippet = html.substring(0, 500)
+
     const rayMatch = html.match(/name="ray_id"\s+value="([^"]+)"/)
     const aliasMatch = html.match(/name="alias"\s+value="([^"]+)"/)
 
     if (!rayMatch || !aliasMatch) {
-      return NextResponse.json({ status: false, message: 'Gagal extract link' }, { status: 500 })
+      return NextResponse.json({
+        status: false,
+        message: 'Gagal extract link',
+        debug: snippet
+      }, { status: 500 })
     }
 
     const ray_id = rayMatch[1]
     const alias = aliasMatch[1]
 
-    // Step 3: Hit redirect
     const r2 = await fetch(`https://app.khaddavi.net/redirect.php?ray_id=${ray_id}&alias=${alias}`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer': url
       },
       redirect: 'follow'
     })
 
-    const finalUrl = r2.url
-
-    // Step 4: Cari link download di halaman hasil
     const html2 = await r2.text()
     const dlMatch = html2.match(/https?:\/\/(www\.)?(mediafire|drive\.google|mega\.nz|zippyshare)[^\s"'<>]+/)
 
     return NextResponse.json({
       status: true,
       input: url,
-      result: dlMatch ? dlMatch[0] : finalUrl,
+      result: dlMatch ? dlMatch[0] : r2.url,
       author: 'Egii Apii'
     })
 
