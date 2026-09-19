@@ -11,22 +11,22 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Coba beberapa bypass API
     const apis = [
-      `https://api.bypass.vip/bypass?url=${encodeURIComponent(url)}`,
       `https://bypass.bot.nu/bypass?url=${encodeURIComponent(url)}`,
+      `https://api.bypass.id/bypass?url=${encodeURIComponent(url)}`,
+      `https://bypasslink.com/api?url=${encodeURIComponent(url)}`,
     ]
 
     for (const api of apis) {
       try {
-        const res = await fetch(api, { 
+        const res = await fetch(api, {
           headers: { 'User-Agent': 'Mozilla/5.0' },
           signal: AbortSignal.timeout(10000)
         })
         const data = await res.json()
-        const result = data.destination || data.url || data.result || data.link
+        const result = data.destination || data.url || data.result || data.link || data.bypass
 
-        if (result && result !== url) {
+        if (result && !result.includes('SHUT DOWN') && !result.includes('discord') && result !== url) {
           return NextResponse.json({
             status: true,
             input: url,
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
       } catch { continue }
     }
 
-    return NextResponse.json({ status: false, message: 'Semua bypass gagal, coba lagi nanti' }, { status: 500 })
+    return NextResponse.json({ status: false, message: 'Bypass gagal, coba lagi nanti' }, { status: 500 })
 
   } catch (e: any) {
     return NextResponse.json({ status: false, message: e.message }, { status: 500 })
