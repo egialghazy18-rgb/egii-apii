@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import chromium from '@sparticuz/chromium'
-import playwright from 'playwright-core'
 
-export const maxDuration = 60
+export const maxDuration = 30
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -12,29 +10,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ status: false, message: 'Parameter url wajib diisi' }, { status: 400 })
   }
 
-  let browser = null
   try {
-    browser = await playwright.chromium.launch({
-      args: chromium.args,
-      executablePath: await chromium.executablePath(),
-      headless: true
-    })
-
-    const page = await browser.newPage()
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 })
-
-    const finalUrl = page.url()
+    const res = await fetch(`https://api.bypass.vip/bypass?url=${encodeURIComponent(url)}`)
+    const data = await res.json()
 
     return NextResponse.json({
       status: true,
       input: url,
-      result: finalUrl,
+      result: data.destination || data.url || data,
       author: 'Egii Apii'
     })
-
   } catch (e: any) {
     return NextResponse.json({ status: false, message: e.message }, { status: 500 })
-  } finally {
-    if (browser) await browser.close()
   }
 }
